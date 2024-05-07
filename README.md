@@ -1,12 +1,23 @@
-# Background study
+# 2. Background generation
+## 2.1 CMS background
+## 2.2. Cosmic ray
 
-**Steps**:
+### General information
 
-1. Estimate resources needed and parameters for Pythia
-    a. Generate 20,000 muons (with muon gun) from IP, with 8,12,20,30,40 GeV Pt
-    b. Log down the time, storage, efficiency (muons that leave hits) at each Pt
-    c. Plot the nhits distribution vs eta/phi. 
-2. Veto strategy
-    a. Track projection
-    b. Track intersection with virtual IP track
-    c. (modular only) Projection into gap
+Package: C++ version of EXPAC, click download on https://phits.jaea.go.jp/expacs/
+https://phits.jaea.go.jp/expacs/data/parma_cpp.zip. This is an analytical model for cosmic ray flux.
+
+Reference: 
+    T.Sato, Analytical model for estimating terrestrial cosmic-ray fluxes nearly anytime and anywhere in the world; Extension of PARMA/EXPACS, 10(12): e0144679 (2015)
+    T.Sato, Analytical model for estimating the zenith angle dependence of terrestrial cosmic ray fluxes, PLOS ONE, 11(8): e0160390 (2016)
+
+Usage: 
+For flux calculation, use main-simple.cpp.
+For event generation, use main-generator.cpp as a reference. The output is saved in GeneOut.
+You need to change the run condition in the code.
+
+Compile: g++ main-generator.cpp subroutines.pp -o main-generator
+Run: ./main-generator
+
+### For mathusla simulation
+

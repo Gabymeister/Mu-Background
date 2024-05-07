@@ -1,0 +1,4 @@
+define lepall = mu+ mu-
+define vorlepall = vl vl~ lepall
+generate p p  > lepall vorlepall
+output proc_sm_muprod_wz_nomatch

@@ -1,0 +1,3 @@
+launch proc_sm_muprod_matched
+set shower Pythia8
+set nevents 10000
