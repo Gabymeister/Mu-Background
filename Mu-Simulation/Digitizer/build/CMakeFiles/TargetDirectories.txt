@@ -1,4 +1,0 @@
-/home/owhgabri/Mu-Background/Mu-Simulation/Digitizer/build/CMakeFiles/edit_cache.dir
-/home/owhgabri/Mu-Background/Mu-Simulation/Digitizer/build/CMakeFiles/digitizer.dir
-/home/owhgabri/Mu-Background/Mu-Simulation/Digitizer/build/CMakeFiles/rebuild_cache.dir
-/home/owhgabri/Mu-Background/Mu-Simulation/Digitizer/build/CMakeFiles/tracker-lib.dir
