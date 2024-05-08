@@ -19,7 +19,7 @@ if [ ! -f Mu-Simulation/simulation ]; then
 	git clone https://github.com/EdmondRen/Mu-Simulation.git
 	cd Mu-Simulation
 	./install --cmake
-	./install_digitizer
+	./install_digitizer --cmake
 fi
 if ! command -v pytracker &> /dev/null; then
 	echo ""
