@@ -1,0 +1,19 @@
+# Format (by column):
+# KEEP the following line to describe total number of hits:
+# nevents 2
+
+# PDG ID of generated particle
+# Initial x-coordinate (mm)
+# Initial y-coordinate (mm)
+# Initial z-coordinate (mm)
+# Initial x-component of momentum (MeV/c)
+# Initial y-component of momentum (MeV/c)
+# Initial z-component of momentum (MeV/c)
+
+n 1
+      13	 124500.0	     4500.0		2000.0	     0.0	     10.0	  -4000.0
+      13	 124500.0	     4500.0		2000.0	     100.0	     433.0	  -4000.0
+      11	 124500.0	     4500.0		2000.0	     400.0	     222.0	  -4000.0
+n 2
+      13     124500.0        4500.0     2000.0       0.0         0.0      -4000.0
+      13     124500.0        4500.0     2000.0       100.0       0.0      -4000.0	  

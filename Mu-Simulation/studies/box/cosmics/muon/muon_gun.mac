@@ -1,0 +1,15 @@
+/det/select Cosmic
+
+/gen/select polar
+
+/gen/polar/id 13
+/gen/polar/t0 0 ns
+/gen/polar/vertex 0 0 -20 m
+
+/gen/polar/polar        1.2 rad
+/gen/polar/azimuth_min  3.14 rad
+/gen/polar/azimuth_max  6.28 rad
+
+/gen/polar/e 10 GeV
+
+/run/beamOn 1000
