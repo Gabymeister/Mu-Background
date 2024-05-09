@@ -4,7 +4,7 @@ PATH_DATA="/project/rrg-mdiamond/data/MATHUSLA"
 #------------------------------------------------------------------
 # Dependencies
 # PYTHIA is in Tom's home directory
-# The rest is availabel from the preinstalled modules on cedar
+# The rest is available from the preinstalled modules on cedar
 export PYTHIA8=/project/def-mdiamond/tomren/mathusla/pythia8308
 export PYTHIA8DATA=$PYTHIA8/share/Pythia8/xmldoc
 PATH=$PATH:/project/def-mdiamond/tomren/mathusla/dlib-19.24/install
