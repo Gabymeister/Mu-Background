@@ -6,25 +6,42 @@
 
 int main(int argc, char *argv[]){
 
-	if (argc != 3) {
-		std::cout << "Need 2 Arguments! \n First argument: input_file_name (or dir) \n Second argument: output_dir_name" << std::endl;
+	if (argc < 5) {
+		std::cout << "Usage:" <<std::endl;
+		std::cout << "-l LHC_directory -c cosmic_directory -o output_dir_name" <<std::endl;
 		return 0;
 	}
 
-	std::vector<TString> files;
+	std::vector<TString> LHCfiles;
+	std::vector<TString> CosmicFiles;
+	TString outdir;
 
-	if ( io::is_directory( argv[1] ) ) {
-		files = io::ProcessDirectory(argv[1], "");
-	} else {
-		files = {TString(argv[1])};
+	int i = 1;
+	while (i < argc) {
+		if (strcmp("-l", argv[i]) == 0) {
+			LHCfiles = io::ProcessDirectory(argv[i+1], "");
+		} else if (strcmp("-c", argv[i]) == 0) {
+			CosmicFiles = io::ProcessDirectory(argv[i+1], "");
+		} else if (strcmp("-o", argv[i]) == 0) {
+			outdir = TString(argv[i+1]);
+		} else {
+			std::cout << "Usage:" <<std::endl;
+			std::cout << "-l LHC_directory -c cosmic_directory -o output_dir_name" <<std::endl;
+			return 0;
+		}
+		i++;
 	}
 	
-	TString outdir = TString(argv[2]);
-
 	RunManager RM;
 	RM.SetOutputFile(outdir);
 
-	for (auto f : files ){
+	for (auto f : LHCfiles ){
+		std::cout << f << std::endl;
+		RM.SetInputFile(f);
+		RM.StartTracking();
+	} 
+
+	for (auto f : CosmicFiles ){
 		std::cout << f << std::endl;
 		RM.SetInputFile(f);
 		RM.StartTracking();

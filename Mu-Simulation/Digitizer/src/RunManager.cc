@@ -24,17 +24,8 @@ int RunManager::StartTracking()
 	TH = &_handler;
 	int events_handled = 0;
 
-	int made_its_k = 0;
-
-	int events_w_k_tracks = 0;
-
-	int verts_k_m = 0;
-
 	int dropped_hits = 0;
 	int floor_wall_hits = 0;
-
-	std::vector<int> zeros(9, 0);
-	std::vector<int> failures_k = zeros;
 
 	ParHandler hndlr;
 	hndlr.Handle();
@@ -79,7 +70,6 @@ int RunManager::StartTracking()
 				}
 				_digitizer->AddHit(current);
 			}
-
 			_digitizer->ev_num = events_handled;
 			std::vector<physics::digi_hit *> digi_list = _digitizer->Digitize();
 			
@@ -93,27 +83,17 @@ int RunManager::StartTracking()
                         digi_list.push_back(digi);
                 }
         	}
-
 			TH->ExportDigis(digi_list, _digitizer->seed);
 
 			TH->Fill();
 
 			dropped_hits += _digitizer->dropped_hits;
 			floor_wall_hits += _digitizer->floor_wall_hits;
-
 		}
-
 		events_handled++;
 	}
-
-	
-
-
 	if (hndlr.file_opened) {
-
 		TH->Write();
-
 	}
-
 	return 0;
 }
