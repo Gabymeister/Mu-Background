@@ -25,7 +25,7 @@ Hit::Hit(const G4ParticleDefinition* particle,
          const double center1,
 		 const double center2,
 		 const int bar_direction,
-		 const int allignment,
+		 const int normal,
 		 const std::string& chamberID,
          const double deposit,
          const G4LorentzVector position,
@@ -36,7 +36,7 @@ Hit::Hit(const G4ParticleDefinition* particle,
 	_center1 = center1;
 	_center2 = center2;
 	_bar_direction = bar_direction;
-	_allignment = allignment;
+	_normal = normal;
 	_chamberID = chamberID;
 	_deposit = deposit;
 	_position = position;
@@ -197,7 +197,7 @@ const auto size = collection->GetSize(); for (std::size_t i = 0; i < column_coun
 	out[2].push_back(hit->GetCenter1());
 	out[3].push_back(hit->GetCenter2());
 	out[4].push_back(hit->GetBarDirection());
-	out[5].push_back(hit->GetAllignment());
+	out[5].push_back(hit->GetLayerDirection());
     out[6].push_back(name_map(hit->GetChamberID()));
     out[7].push_back(hit->GetPDGEncoding());
     out[8].push_back(hit->GetTrackID());
@@ -257,7 +257,7 @@ const Analysis::ROOT::DataEntryList _convert_to_cut_analysis(const HitCollection
 		out[2].push_back(hit->GetCenter1());
 		out[3].push_back(hit->GetCenter2());
 		out[4].push_back(hit->GetBarDirection());
-		out[5].push_back(hit->GetAllignment());
+		out[5].push_back(hit->GetLayerDirection());
     	out[6].push_back(name_map(hit->GetChamberID()));
     	out[7].push_back(hit->GetPDGEncoding());
     	out[8].push_back(hit->GetTrackID());

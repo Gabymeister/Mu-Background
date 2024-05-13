@@ -9,11 +9,14 @@ from pylab import *
 
 # Detector
 box_size=[40,40,20]
-t_max = np.linalg.norm(box_size)/0.3
+t_max = 200*1.5 # np.linalg.norm(box_size)/0.3
 time_window = [-t_max, t_max] #  [ns] Time window needs to cover the time of flight from one corner to another. For 40mx40mx20m, the diagonal is 60m, divided by speed of ligh 0.3m/ns
-hit_offset_x = 70
-hit_offset_y = box_size[1]*-0.5
-hit_offset_z = 14
+hit_offset_x = 90
+hit_offset_y = 0
+hit_offset_z = 20
+decay_volume_middle_height = 0.8+13.6/2
+cms_z = -85.47
+cosmic_radius = 35 # radius of the target area in m
 
 seed = 1
 
@@ -27,9 +30,10 @@ tracker2="python3 /home/tomren/jupyter/pyTracker/tracker/run.py "
 
 
 
-hit_plane_x = [hit_offset_x, hit_offset_x+box_size[0]]
-hit_plane_y = [hit_offset_y, hit_offset_y+box_size[1]]
+hit_plane_x = [hit_offset_x-box_size[0]*0.5, hit_offset_x+box_size[0]*0.5]
+hit_plane_y = [hit_offset_y-box_size[1]*0.5, hit_offset_y+box_size[1]*0.5]
 hit_plane_z = hit_offset_z
+hit_time_offset = np.linalg.norm([decay_volume_middle_height - cms_z, hit_offset_x + box_size[0]*0.5])/0.3 - (cosmic_radius)/0.3
 
 rng = np.random.default_rng(seed)
 
@@ -141,8 +145,18 @@ def submit_script(script, job_name, run_number, hours, log_dir, cores=1, ram=204
         os.system(full_command)
 
 # Particle ID (Particle ID, 0:neutron, 1-28:H-Ni, 29-30:muon+-, 31:e-, 32:e+, 33:photon)
-pid_to_g4pid = {29:13, 30:-13, 31:11, 32:-11}
-particle_mass = {13:105.6583755, 11:0.51099895} # labled with G4pid
+pid_to_g4pid = {0:2112,
+                1:2212,
+                29:13,
+                30:-13,
+                31:11,
+                32:-11,
+               33:22}
+particle_mass = {13:105.6583755, 
+                 11:0.51099895,
+                22:0,
+                2112:940.6,
+                2212:938.27} # labled with G4pid
 
 # Read the flux of each data type
 file_info={}
@@ -180,19 +194,25 @@ for i in range(len(filenames)):
     mass = particle_mass[abs(pid)]
     for i in range(nevents):
         energy, u, v, w, x, y, z = data[i][:]
-        px, py, pz =  energy* np.array([u,v,w]) #np.sqrt(energy**2-mass**2)
-        x, y, z = rng.uniform(*hit_plane_x), rng.uniform(*hit_plane_y), hit_plane_z
-        data_combined["pid"].append(pid)
+        momentum = np.sqrt(energy**2 + 2*energy*mass)
+        px, py, pz =  momentum* np.array([u,v,w]) #np.sqrt(energy**2-mass**2)
+        # x, y, z = rng.uniform(*hit_plane_x), rng.uniform(*hit_plane_y), hit_plane_z
+        # data_combined["x"].append(x*1000)
+        # data_combined["y"].append(y*1000)
+        # data_combined["z"].append(-z*1000) 
+        
+        data_combined["x"].append((x+hit_offset_x)*1000)
+        data_combined["y"].append((y+hit_offset_y)*1000)
+        data_combined["z"].append(-z*1000)        
         data_combined["px"].append(px)
         data_combined["py"].append(py)
         data_combined["pz"].append(-pz)
-        data_combined["x"].append(x*1000)
-        data_combined["y"].append(y*1000)
-        data_combined["z"].append(-z*1000)
-        data_combined["t"].append(rng.uniform(*time_window))
+
+        data_combined["t"].append(rng.uniform(time_window[0]+hit_time_offset, time_window[1]+hit_time_offset))
+        data_combined["pid"].append(pid)
     
 print("Total events", total_events)
-np.save(path + f"combined_{total_events}_events.npz", data_combined)
+np.save(path + f"/combined_{total_events}_events", data_combined)
 
 
 
@@ -216,19 +236,23 @@ sim_script_filename = generate_sim_script_filereader(filename_filereader)
 
 
 # Make a bash script to call Geant and submit jobs
+run_script = f"{simulation} -j1 -q  -o {sim_output_path}  -s {sim_script_filename} "
 job_script=f"""
 export PYTHIA8=/project/def-mdiamond/tomren/mathusla/pythia8308
 export PYTHIA8DATA=$PYTHIA8/share/Pythia8/xmldoc
 PATH=$PATH:/project/def-mdiamond/tomren/mathusla/dlib-19.24/install
 module load StdEnv/2020 gcc/9.3.0 qt/5.12.8 root/6.26.06  eigen/3.3.7 geant4/10.7.3 geant4-data/10.7.3
 
+{run_script}
 
-{simulation} -j1 -q  -o {sim_output_path}  -s {sim_script_filename}  
+echo "Run finished, cleaning input files"
+\rm {path} -rf
+
 """
 
 if run:
-    print(f"Running command: {job_script}")
-    os.system(job_script)
+    print(f"Running command: {run_script}")
+    os.system(run_script)
 else:
     submit_script(job_script, job_name=f"sim", run_number=0, hours=1, cores=1, log_dir=sim_output_path, slurm_account="rrg-mdiamond", slurm_partition='', debug=debug, verbose=verbose)
 

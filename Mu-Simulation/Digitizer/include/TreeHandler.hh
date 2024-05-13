@@ -68,7 +68,7 @@ public:
  		InputTree->SetBranchAddress("Hit_Center1", &sim_hit_center1);
  		InputTree->SetBranchAddress("Hit_Center2", &sim_hit_center2);
  		InputTree->SetBranchAddress("Hit_bar_direction", &sim_hit_bar_direction);
- 		InputTree->SetBranchAddress("Hit_allignment", &sim_hit_allignment);
+ 		InputTree->SetBranchAddress("Hit_layer_direction", &sim_hit_layer_direction);
  		InputTree->SetBranchAddress("Hit_LayerID", &sim_hit_layerID);
 
  		InputTree->SetBranchAddress("Hit_particlePdgId", &sim_hit_particlePdgId);
@@ -133,7 +133,7 @@ public:
  		OutputTree->Branch("Hit_Center1", sim_hit_center1);
  		OutputTree->Branch("Hit_Center2", sim_hit_center2);
  		OutputTree->Branch("Hit_bar_direction", sim_hit_bar_direction);
- 		OutputTree->Branch("Hit_allignment", sim_hit_allignment);
+ 		OutputTree->Branch("Hit_layer_direction", sim_hit_layer_direction);
  		OutputTree->Branch("Hit_LayerID", sim_hit_layerID);
  		OutputTree->Branch("Hit_particlePdgId", "std::vector<double>", sim_hit_particlePdgId);
  		OutputTree->Branch("Hit_G4TrackId", "std::vector<double>", sim_hit_G4TrackId);
@@ -162,7 +162,7 @@ public:
 		OutputTree->Branch("Digi_center1", &digi_center1);
 		OutputTree->Branch("Digi_center2", &digi_center2);
 		OutputTree->Branch("Digi_bar_direction", &digi_bar_direction);
-		OutputTree->Branch("Digi_allignment", &digi_allignment);
+		OutputTree->Branch("Digi_layer_direction", &digi_layer_direction);
 		OutputTree->Branch("Digi_layer_id", &digi_LayerID);
 		OutputTree->Branch("Digi_det_id", &digi_detID);
         OutputTree->Branch("Digi_seed", &digi_seed, "Digi_seed/L");
@@ -194,7 +194,7 @@ public:
  	std::vector<double> *sim_hit_center1 = nullptr; 
  	std::vector<double> *sim_hit_center2 = nullptr; 
  	std::vector<double> *sim_hit_bar_direction = nullptr; 
- 	std::vector<double> *sim_hit_allignment = nullptr;
+ 	std::vector<double> *sim_hit_layer_direction = nullptr;
  	std::vector<double> *sim_hit_layerID = nullptr;
  	std::vector<double> *sim_hit_particlePdgId = nullptr;
  	std::vector<double> *sim_hit_G4TrackId = nullptr;
@@ -260,7 +260,7 @@ public:
 	std::vector<double> digi_center1;
 	std::vector<double> digi_center2;
 	std::vector<int> digi_bar_direction;
-	std::vector<int> digi_allignment;
+	std::vector<int> digi_layer_direction;
 	std::vector<int> digi_LayerID;
 	std::vector<int> digi_detID;
   	std::vector<int> digi_hit_indices;
@@ -287,7 +287,7 @@ void TreeHandler::ExportDigis(std::vector<digi_hit*> digi_list, long long int se
 	  digi_center1.clear();
 	  digi_center2.clear();
 	  digi_bar_direction.clear();
-	  digi_allignment.clear();
+	  digi_layer_direction.clear();
 	  digi_LayerID.clear();
 	  digi_detID.clear();
       
@@ -309,7 +309,7 @@ void TreeHandler::ExportDigis(std::vector<digi_hit*> digi_list, long long int se
 		digi_center1.push_back(digi->det_id.center1);
 		digi_center2.push_back(digi->det_id.center2);
 		digi_bar_direction.push_back(digi->det_id.bar_direction);
-		digi_allignment.push_back(digi->det_id.allignment);
+		digi_layer_direction.push_back(digi->det_id.normal);
 		digi_LayerID.push_back(digi->det_id.layerID);
 		digi_detID.push_back(digi->det_id.detectorID);
         for (auto hit : digi->hits){

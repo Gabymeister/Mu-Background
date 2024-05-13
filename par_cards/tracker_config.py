@@ -2,12 +2,12 @@ parameters = {}
 
 
 # Run parameters
-parameters["debug"]=False                   # Show debug info
+parameters["debug"]=True                   # Show debug info
 parameters["debug_tracker"]=False
 parameters["debug_vertexer"]=False
-parameters["print_n"]=100
-parameters["start_event"]=0                 # 0-based index
-parameters["end_event"]=100_000
+parameters["print_n"]=1
+parameters["start_event"]=8                 # 0-based index
+parameters["end_event"]=9
 parameters["seed"]=1                        # Seed for random number generator (used for scintillator efficiency)
 parameters["detector_efficiency"]=0.95         # Scintillator efficiency, any number between 0-1, 1 is 100%
 

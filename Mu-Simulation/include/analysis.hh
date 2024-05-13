@@ -214,7 +214,7 @@ static const DataKeyList DefaultDataKeyList{
   "NumHits",
 
   "Hit_energy", "Hit_time", "Hit_Center1", "Hit_Center2", "Hit_bar_direction",
-  "Hit_allignment", "Hit_LayerID",
+  "Hit_layer_direction", "Hit_LayerID",
   "Hit_particlePdgId", "Hit_G4TrackId", "Hit_G4ParentTrackId",
   "Hit_x", "Hit_y", "Hit_z",
   "Hit_particleEnergy", "Hit_particlePx", "Hit_particlePy", "Hit_particlePz",
