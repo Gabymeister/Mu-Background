@@ -1,5 +1,10 @@
-export PYTHIA8=/home/owhgabri/pythia8310
-export PYTHIA8DATA=$PYTHIA8/share/Pythia8/xmldoc
-export PYTHIA8_LIBRARY=$PYTHIA8/lib
+#!/bin/bash
 
-/home/owhgabri/Mu-Background/Mu-Simulation/simulation -s /home/owhgabri/Mu-Background/Mu-Simulation/Simulation/scripts/muons_set_pT/muons_80pT.mac -o /home/owhgabri/Mu-Background/data/muons_set_pT
+TENTHOUSANDS=5
+
+for (( i=1; i <=$TENTHOUSANDS; i++ ))
+do
+	sbatch sbatch_all.sh
+	echo "submitted bash job ${i}"
+	sleep 10
+done

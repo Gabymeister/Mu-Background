@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --time=6:00:00
 #SBATCH --account=def-mdiamond
-#SBATCH --array=1-100
+#SBATCH --array=1-10
 #SBATCH --mem=2G
 
 # ${1} is the location of the madgraph executable.
@@ -9,11 +9,12 @@
 # ${3} is the minimum pT cutoff you want to apply (in MeV) (normally 20k)
 
 if [ $# -ne 3 ]; then
-	echo "Usage: $0 <MG5 Executable> <RunNumber> <pT Cutoff>"
+	echo "Usage: $0 <MG5 TopDirectory> <RunNumber> <pT Cutoff>"
+	echo "Note: MG5 TopDirectory should be the ABSOLUTE path"
 	exit 1
 fi
 
-# MG5_Dir is where the madgraph executable is
+# MG5_Dir is where the madgraph TOP DIRECTORY is
 MG5_Dir=${1}
 
 # Scripts is the directory where the Base MadGraph Script is
@@ -24,16 +25,8 @@ Extractor="Mu-Simulation/VectorExtraction/run_muon_extract.py"
 Combiner="Mu-Simulation/VectorExtraction/combine_muon_data.py"
 # G4SimFiles is where the extracted muons and macros will be stored
 G4SimFiles="data/G4SimFiles"
-# G4Sim_Dir is where the Geant4 Simulation executable is
-G4Sim_Dir="Mu-Simulation"
-# G4SimFiles is where the extracted muons and macros will be stored
-G4SimFiles="data/G4SimFiles"
 # G4DataDir is the directory where the Geant4 root files are created
 G4DataDir="data/G4Output"
-# Digi_Dir is where digitizer executable is
-Digi_Dir="Mu-Simulation"
-# DigiDataDir is the directory where the digitized root files are created
-DigiDataDir="data/MadGraphDigitized"
 
 #MadGraphScripts is the directory where the created scripts will be stored
 MadGraphScripts="${SLURM_TMPDIR}/MadGraphScripts"
@@ -48,6 +41,17 @@ mkdir "${SLURM_TMPDIR}/MadGraphScripts"
 mkdir "${SLURM_TMPDIR}/MadGraphOutput"
 mkdir "${SLURM_TMPDIR}/HepMCToText"
 
+if [ ! -d "${G4DataDir}" ]; then
+	mkdir ${G4DataDir}
+fi
+
+if [ ! -d "${G4SimFiles}" ]; then
+	mkdir ${G4SimFiles}
+fi
+
+# Sourcing init.sh
+source init.sh
+
 # Two identifiers: One is the MG5 set number, the other is the Job number
 # Each set number corresponds to about 25 hours (check this)
 NumSets=${2}
@@ -60,7 +64,7 @@ do
   # Create the MadGraph Scripts for each set of each job
   echo "Creating MadGraph Scripts"
   seedval=$((c + NumSets * SLURM_ARRAY_TASK_ID))
-  cp "${Scripts}/sm_muprod_wz.txt" "${MadGraphScripts}/sm_muprod_wz_${SLURM_ARRAY_TASK_ID}_${c}.txt"
+  cp "${Scripts}/test.txt" "${MadGraphScripts}/sm_muprod_wz_${SLURM_ARRAY_TASK_ID}_${c}.txt"
   sed -i "14s/.*/set iseed = ${seedval}/" "${MadGraphScripts}/sm_muprod_wz_${SLURM_ARRAY_TASK_ID}_${c}.txt"
   sed -i "5s|.*|output ${MGDataDir}/proc_sm_muprod_wz_matched_${SLURM_ARRAY_TASK_ID}_${c}|" "${MadGraphScripts}/sm_muprod_wz_${SLURM_ARRAY_TASK_ID}_${c}.txt"
   sed -i "6s|.*|launch ${MGDataDir}/proc_sm_muprod_wz_matched_${SLURM_ARRAY_TASK_ID}_${c}|" "${MadGraphScripts}/sm_muprod_wz_${SLURM_ARRAY_TASK_ID}_${c}.txt"
@@ -83,7 +87,7 @@ done # Generated NumSets text files of 10000 muon events
 
  # Combine the Text Files into One/Create Geant4 scripts
 echo "Combining Text Files"
-python3 ${Combiner} ${G4SimFiles} ${SLURM_ARRAY_TASK_ID} ${NumSets} ${HepMCToText}
+python3 ${Combiner} "${G4SimFiles}" "${SLURM_ARRAY_TASK_ID}" "${NumSets}" "${HepMCToText}"
 for (( c=0; c<NumSets; c++ ))
 do
   rm "${HepMCToText}/bkg_muon_${SLURM_ARRAY_TASK_ID}_${c}.txt"
@@ -103,16 +107,13 @@ module load geant4/10.7.3
 module load geant4-data/10.7.3
 # Run Geant4
 echo "Running Geant4"
-#TODO: make sure that the macro is accessing the correct spot (combine_muon_data.py)
-./simulation -q -s "${G4SimFiles}/bkg_muon_${SLURM_ARRAY_TASK_ID}.mac" -o "${G4DataDir}/bkg_muon_${SLURM_ARRAY_TASK_ID}"
+${simulation} -q -s ${G4SimFiles}/bkg_muon_${SLURM_ARRAY_TASK_ID}.mac -o ${G4DataDir}/bkg_muon_${SLURM_ARRAY_TASK_ID}
 
 # Run the Digitizer
 echo "Running Digitizer"
 # Don't know exactly the name of the G4 output root file (dependent on date)
 find "${G4DataDir}/bkg_muon_${SLURM_ARRAY_TASK_KD}" -type f -name "*.root" | while read -r file; do
-  ./digitizer $file ${DigiDataDir}
+  ${digitizer} $file ${DigiDataDir}
   rm -rf "data/tmp_${SLURM_ARRAY_TASK_ID}"
 done
-
-
 

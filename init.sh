@@ -31,8 +31,8 @@ fi
 popd
 # Now we have the simulation and digitizer. Make an alias for them
 # The tracker can be run directly with command pytracker
-simulation=`realpath ../Mu-Simulation/simulation`
-digitizer=`realpath ../Mu-Simulation/digitizer`
+simulation=`realpath Mu-Simulation/simulation`
+digitizer=`realpath Mu-Simulation/digitizer`
 
 
 
