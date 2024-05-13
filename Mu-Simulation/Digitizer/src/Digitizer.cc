@@ -33,22 +33,29 @@ std::vector<physics::digi_hit*> Digitizer::Digitize(){
 
 		//current detector id which we are working in
 		auto current_id = (current_remaining_hits[0])->det_id;
-
+		double x = (current_remaining_hits[0])->x;
+		double y = (current_remaining_hits[0])->y;
+		double z = (current_remaining_hits[0])->z;
 
 		//taking out all hits with the same detector id to be digitized, leaving the remaing for the next iteration
 		for (auto hit : current_remaining_hits){
-			if (hit->det_id.IsNull()) continue;
-			if (hit->det_id == current_id){ current_hits.push_back(hit);}
+			if (hit->det_id.IsNull()) {
+				std::cout << "hit detector ID is null" << std::endl;
+				continue;
+			}
+			if (hit->det_id == current_id){current_hits.push_back(hit);} 
 			else {next_remaining_hits.push_back(hit);}
-
 		}
 
+		if (current_hits.size() == 0) {
+			std::cout << "IMPOSSIBLE" << std::endl;
+			current_id.Print();
+		}
 		//time sorting current hits
-
 		std::sort(current_hits.begin(), current_hits.end(), &physics::time_sort);
 
-
 		// going through all hits until they are either all added to digis, or dropped
+		//
 
 		while (current_hits.size() > 0){
 
@@ -63,7 +70,8 @@ std::vector<physics::digi_hit*> Digitizer::Digitize(){
 				if ( hit->t < t0 + cuts::digi_spacing ){
 					e_sum += hit->e;
 					used_hits.push_back(hit);
-				} else { unused_hits.push_back(hit);}
+				} else { 
+					unused_hits.push_back(hit);}
 			}
             
             // ignoring all hits in ignored floors/walls or above wall y cut
@@ -103,7 +111,6 @@ std::vector<physics::digi_hit*> Digitizer::Digitize(){
 	// Now we throw out hits in the floor and wall to simulate reduced detector efficiency
 	std::vector<physics::digi_hit*> digis_not_dropped;
 
-	// now manage hits in the floor and wall
 	for (auto digi : digis){
 		auto current_id = digi->det_id;
 
@@ -116,14 +123,10 @@ std::vector<physics::digi_hit*> Digitizer::Digitize(){
 		double e_sum = 0;
 		double long_direction_sum = 0.0;
 		double t_sum = 0;
-		double x_sum = 0;
-		double y_sum = 0;
 
 		for (auto hit : digi->hits){
 			e_sum += hit->e;
 			t_sum += hit->t * hit->e;
-			y_sum += hit->y * hit->e;
-			x_sum += hit->x * hit->e;
 			if (long_direction_index == 0){
 				long_direction_sum += hit->x * hit->e;
 			} else if (long_direction_index == 1) {
@@ -144,7 +147,7 @@ std::vector<physics::digi_hit*> Digitizer::Digitize(){
 		// Floor and tracking layers: to the center of each bar
 		//note: et is the same for all of them and is set in the digi class defintion
 		// if (current_id.isFloorElement || current_id.isWallElement){
-		if (current_id.allignment == 1){//vertical
+		if (current_id.normal == 0 || current_id.normal == 2){//vertical
 			digi->z = center[1];
 			if (long_direction_index == 0){
 				digi->x = long_direction_sum/e_sum;
@@ -178,7 +181,7 @@ std::vector<physics::digi_hit*> Digitizer::Digitize(){
 
 		//--Position smearing for Wall hits 		
 		//--2023-06-30 Tom: turn off
-		if (current_id.allignment == 1) {
+		if (current_id.normal == 2) {
 			if (long_direction_index == 0) {
 				double smeared_x = digi->x + generator.Gaus(0.0, digi->ex);
 				digi->x = smeared_x;
@@ -193,10 +196,11 @@ std::vector<physics::digi_hit*> Digitizer::Digitize(){
 		} else if (long_direction_index == 2) {
 			double smeared_z = digi->z + generator.Gaus(0.0, digi->ez);
 			digi->z = smeared_z;
-		}
+		} else {
+            std::cout << "Not supposed to be here!" << std::endl;
+        }
 		digis_not_dropped.push_back(digi); // it's a tracking / trigger layer hit, so it will never be dropped
 	}
-
 	digis = digis_not_dropped; // only keep hits not dropped by inefficiency in the floor or wall
 	//setting digi indices
 	int k = 0;

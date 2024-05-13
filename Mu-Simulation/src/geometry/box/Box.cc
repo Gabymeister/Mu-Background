@@ -361,12 +361,12 @@ G4bool Detector::ProcessHits(G4Step* step, G4TouchableHistory*) {
 	size_t z_index = 0;
 	size_t z_module = 0;
 	size_t bar_direction = 0; //0-x,1-y,2-z
-	size_t allignment = 0; //0-layer, 1-wall
+	size_t normal = 0; //0-x,1-y,2-z
 	size_t layerID = 0;
 	double  center1 = 0; //stored
 	double center2 = 0;//stored
 	if (local_position.z() < 0) { // It is the front wall layer
-		allignment = 1;
+		normal = 2;
 		z_module = n_wall_layers - 1 - int(abs(local_position.z()/wall_gap2));
 		layerID = z_module;
 		center2 = x_displacement - wall_gap - 0.5*full_layer_height - (n_wall_layers - 1 - z_module)*(full_layer_height + wall_gap2);
@@ -383,7 +383,7 @@ G4bool Detector::ProcessHits(G4Step* step, G4TouchableHistory*) {
 		}
 
   	} else if (local_position.z() < x_edge_length) { // It is in the main detector (horizontal layers)
-		allignment = 0;
+		normal = 1;
 		for (int i = 0; i < n_top_layers + n_floor_layers; i++){
 			if (local_position.y() >= layer_z_world[i] && local_position.y() <= layer_z_world[i] + layer_w_case){
 				y_module = i;
@@ -438,7 +438,7 @@ G4bool Detector::ProcessHits(G4Step* step, G4TouchableHistory*) {
 		}
 
   	} else if (local_position.z() > x_edge_length) { // It is in the back wall
-		allignment = 1;
+		normal = 2;
 		z_module = int((local_position.z()-x_edge_length)/(layer_w_case + layer_spacing_top));
 		center2 = z_module*(layer_w_case + layer_spacing_top) + 0.5*layer_w_case + x_edge_length + x_displacement;
 		layerID = z_module + n_wall_layers + n_floor_layers + sqrt(NMODULES);
@@ -468,7 +468,7 @@ G4bool Detector::ProcessHits(G4Step* step, G4TouchableHistory*) {
  int detectorID;
  int n_x, n_z; // number of bars in x/z-direction in one module
 
-  if (allignment == 1) { //walls
+  if (normal == 2) { //walls
 	  if (layerID < n_wall_layers) {//front_walls
 	  	if (bar_direction == 0) n_x = std::ceil(x_edge_length/scint_x_edge_length);
 		else n_x = std::ceil(x_edge_length/scint_y_edge_length);
@@ -505,7 +505,7 @@ G4bool Detector::ProcessHits(G4Step* step, G4TouchableHistory*) {
 	center1 / Units::Length,
 	center2 / Units::Length,
 	bar_direction,
-	allignment,
+	normal,
 	_id,
     deposit / Units::Energy,
     G4LorentzVector(new_position.t() / Units::Time,   new_position.vect() / Units::Length),

@@ -23,7 +23,6 @@ include_directories(${EIGEN3_INCLUDE_DIR})
 add_library(tracker-lib SHARED
     src/RunManager.cc
     src/Digitizer.cc
-    src/Physics.cc
 	src/NoiseMaker.cc
 	src/LinearAlgebra.cc
 	src/par_handler.cc

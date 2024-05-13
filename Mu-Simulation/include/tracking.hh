@@ -60,7 +60,7 @@ public:
 	  const double center1,
 	  const double center2,
 	  const int bar_direction,
-	  const int allignment,
+	  const int normal,
 	  const std::string& chamberID,
       const double deposit,
       const G4LorentzVector position,
@@ -77,7 +77,7 @@ public:
   double 				 GetCenter1()	   const { return _center1;						}
   double 				 GetCenter2()	   const { return _center2;						}
   int 				 	 GetBarDirection() const { return _bar_direction;               }
-  int					 GetAllignment()   const { return _allignment;					}
+  int					 GetLayerDirection()   const { return _normal;					}
   const std::string&     GetChamberID()    const { return _chamberID;                   }
   double                 GetDeposit()      const { return _deposit;                     }
   const G4LorentzVector& GetPosition()     const { return _position;                    }
@@ -103,7 +103,7 @@ private:
   double _center1;
   double _center2;
   int _bar_direction;
-  int _allignment;
+  int _normal;
   std::string _chamberID;
   double _deposit;
   G4LorentzVector _position;
