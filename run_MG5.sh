@@ -1,3 +1,10 @@
+#!/bin/bash
+#SBATCH --time=6:00:00
+#SBATCH --account=def-mdiamond
+#SBATCH --array=1-100
+#SBATCH --mem=2G
+
+
 # ${1} is the location of the madgraph executable.
 # ${2} is the minimum pT cutoff you want to apply (in MeV) (normally 20k)a
 
@@ -56,14 +63,14 @@ module load geant4-data/10.7.3
 # Running MadGraph
 # Two identifiers: One is the MG5 set number, the other is the Job number
 # Each set number corresponds to about 25 hours (check this)
-NumSets=2
+NumSets=5
 for (( c=0; c<NumSets; c++ )) # Generate NumSets*10000 MadGraph Events
 do
 
   # Create the MadGraph Scripts for each set of each job
   echo "Creating MadGraph Scripts"
   seedval=$((c + NumSets * SLURM_ARRAY_TASK_ID))
-  cp "${Scripts}/test.txt" "${MadGraphScripts}/sm_muprod_wz_${SLURM_ARRAY_TASK_ID}_${c}.txt"
+  cp "${Scripts}/sm_muprod_wz.txt" "${MadGraphScripts}/sm_muprod_wz_${SLURM_ARRAY_TASK_ID}_${c}.txt"
   sed -i "14s/.*/set iseed = ${seedval}/" "${MadGraphScripts}/sm_muprod_wz_${SLURM_ARRAY_TASK_ID}_${c}.txt"
   sed -i "5s|.*|output ${MGDataDir}/proc_sm_muprod_wz_matched_${SLURM_ARRAY_TASK_ID}_${c}|" "${MadGraphScripts}/sm_muprod_wz_${SLURM_ARRAY_TASK_ID}_${c}.txt"
   sed -i "6s|.*|launch ${MGDataDir}/proc_sm_muprod_wz_matched_${SLURM_ARRAY_TASK_ID}_${c}|" "${MadGraphScripts}/sm_muprod_wz_${SLURM_ARRAY_TASK_ID}_${c}.txt"
@@ -92,21 +99,3 @@ for (( c=0; c<NumSets; c++ ))
 do
   rm "${HepMCToText}/bkg_muon_${SLURM_ARRAY_TASK_ID}_${c}.txt"
 done
-
-# ---------------------------------------------------------------------------------------
-# Run the function initsim
-echo "Running initsim"
-export PYTHIA8=/project/def-mdiamond/tomren/mathusla/pythia8308
-export PYTHIA8DATA=$PYTHIA8/share/Pythia8/xmldoc
-PATH=$PATH:/project/def-mdiamond/tomren/mathusla/dlib-19.24/install
-module load StdEnv/2020
-module load qt/5.12.8
-module load gcc/9.3.0
-module load root/6.26.06
-module load eigen/3.3.7
-module load geant4/10.7.3
-module load geant4-data/10.7.3
-# Run Geant4
-echo "Running Geant4"
-echo "simulation: ${simulation}"
-${simulation} -s ${G4Input}/bkg_muon_${SLURM_ARRAY_TASK_ID}.mac -o ${PATH_MG5_out}/bkg_muon_${SLURM_ARRAY_TASK_ID}
