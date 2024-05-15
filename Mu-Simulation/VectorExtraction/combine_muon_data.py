@@ -6,8 +6,8 @@ PREFIX = "/bkg_muon_"
 
 phi_min = -0.21
 phi_max = 0.21
-eta_min = 1.32
-eta_max = 0.833
+eta_max = 1.32
+eta_min = 0.833
 
 eta_range = [100000, -100000]
 phi_range = [100000, -100000]
@@ -59,12 +59,14 @@ for i in range(int(sys.argv[3])):
                 eta_range[1] = eta
             if phi >= phi_min and phi <= phi_max and eta >= eta_min and eta <= eta_max:
                 in_range += 1
-    combined.write(line)
+        combined.write(line)
     combined.close()
     TotalEvents += FileEvents
 
 print("Total Events:", TotalEvents)
 print("Events towards detector:", in_range)
+print("Eta ranges:", eta_range)
+print("Phi ranges:", phi_range)
 
 # Writing the Macro
 macro = open(sys.argv[1] + PREFIX + str(sys.argv[2]) + ".mac", 'w')

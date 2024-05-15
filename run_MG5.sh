@@ -35,7 +35,7 @@ MGDataDir="${SLURM_TMPDIR}/MadGraphOutput"
 #but before being combined into one file.
 HepMCToText="${SLURM_TMPDIR}/HepMCToText"
 #Location of the combined data files and scripts to be passed to Geant4
-G4Input="${SLURM_TMPDIR}/G4Input"
+G4Input="data/G4Input"
 simulation=`realpath Mu-Simulation/simulation`
 
 # ---------------------------------------------------------------------------------------

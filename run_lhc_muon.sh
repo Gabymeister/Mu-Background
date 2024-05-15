@@ -28,7 +28,7 @@ MGDataDir="${SLURM_TMPDIR}/MadGraphOutput"
 #but before being combined into one file.
 HepMCToText="${SLURM_TMPDIR}/HepMCToText"
 #Location of the combined data files and scripts to be passed to Geant4
-G4Input="${SLURM_TMPDIR}/G4Input"
+G4Input="data/G4Input"
 simulation=`realpath Mu-Simulation/simulation`
 
 # ---------------------------------------------------------------------------------------
@@ -36,7 +36,7 @@ simulation=`realpath Mu-Simulation/simulation`
 mkdir "${SLURM_TMPDIR}/MadGraphScripts"
 mkdir "${SLURM_TMPDIR}/MadGraphOutput"
 mkdir "${SLURM_TMPDIR}/HepMCToText"
-mkdir "${SLURM_TMPDIR}/G4Input"
+mkdir "data/G4Input"
 
 # Set the right version of pythia for madgraph
 echo "Exporting PYTHIA8"
