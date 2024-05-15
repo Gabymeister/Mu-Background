@@ -66,6 +66,56 @@ void FileReaderGenerator::SetNewValue(G4UIcommand *command, G4String value) {
       if (next_char == '#') {
               input_stream.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
               continue;}
+
+      // Line start with "E":  make a new event.
+      // This line contain the vertex information
+      if (next_char == 'E') {
+        _events.emplace_back();
+        // Read the VERTEX information
+        std::string temp1;
+        int event_number;
+
+        if ( ! (input_stream>>  temp1
+                            >> _particle.index
+                            >> _particle.id
+                            >> _particle.x
+                            >> _particle.y
+                            >> _particle.z
+                            >> _particle.px
+                            >> _particle.py
+                            >> _particle.pz
+                            >> _particle.t)) {
+          throw std::runtime_error("Unable to parse Vertex parameters");
+        }  
+        // Push the information of the primary vertex to list
+        // If more particles are added, the primary vertex will not be generated. This information is saved for analysis
+        // If this is the only particle in the event, it will be generated
+        auto &new_event = _events.back();
+        new_event.push_back(_particle);
+        // Jump to the Next line
+        input_stream.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        continue;
+      } 
+      // Line start with "P": Add particles to an existing event
+      if (next_char == 'P') {
+        auto &new_event = _events.back();
+        new_event.emplace_back();
+        auto &new_parameters = new_event.back();
+        std::string temp1;
+        if ( ! (input_stream>> temp1 
+                            >> new_parameters.id
+                            >> new_parameters.x
+                            >> new_parameters.y
+                            >> new_parameters.z
+                            >> new_parameters.px
+                            >> new_parameters.py
+                            >> new_parameters.pz
+                            >> new_parameters.t)) {throw std::runtime_error("Unable to parse particle parameters file (new)");}
+        continue;
+      }    
+
+      
+      // Keep this to be backward compatible              
       // "n" for new event. Make a new event if see a line "n"
       if (next_char == 'n') {
         _events.emplace_back();

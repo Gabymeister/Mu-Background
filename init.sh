@@ -1,6 +1,5 @@
 PATH_DATA="/project/rrg-mdiamond/data/MATHUSLA"
 
-
 #------------------------------------------------------------------
 # Dependencies
 # PYTHIA is in Tom's home directory
@@ -31,11 +30,8 @@ fi
 popd
 # Now we have the simulation and digitizer. Make an alias for them
 # The tracker can be run directly with command pytracker
-simulation=`realpath Mu-Simulation/simulation`
-digitizer=`realpath Mu-Simulation/digitizer`
-
-
-
+simulation=`realpath ../Mu-Simulation/simulation`
+digitizer=`realpath ../Mu-Simulation/digitizer`
 
 #------------------------------------------------------------------
 # Cosmic
@@ -58,7 +54,16 @@ if [ ! -f cosmic/parma_cpp/cosmic_gen ]; then
 fi
 # Set the output path of PARMA
 ln -s  $PATH_COSMIC_tmp cosmic/parma_cpp/GeneOut
-# ----------------------------------------------------------------
 
+# ----------------------------------------------------------------
+# LHC (MadGraph)
+PATH_MG5_in=$PATH_DATA/SimInput/MG5 # Location of scripts for MadGraph
+PATH_MG5_out=$PATH_DATA/SimOutput/MG5 #Location of generated text files for G4
+
+mkdir -p $PATH_MG5_in
+mkdir -p $PATH_MG5_out
+
+export PATH_MG5_in=$PATH_MG5_in
+export PATH_MG5_out=$PATH_MG5_out
 
 

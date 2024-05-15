@@ -7,7 +7,8 @@ import glob
 from pylab import *
 
 
-# Detector
+# --------------------------------------------------------------------------------
+# Detector variables
 box_size=[40,40,20]
 t_max = 200*1.5 # np.linalg.norm(box_size)/0.3
 time_window = [-t_max, t_max] #  [ns] Time window needs to cover the time of flight from one corner to another. For 40mx40mx20m, the diagonal is 60m, divided by speed of ligh 0.3m/ns
@@ -18,25 +19,17 @@ decay_volume_middle_height = 0.8+13.6/2
 cms_z = -85.47
 cosmic_radius = 35 # radius of the target area in m
 
-seed = 1
-
-
-# Sim and tracker executable
-simulation='/project/def-mdiamond/tomren/mathusla/Mu-Simulation/simulation '
-tracker2="python3 /home/tomren/jupyter/pyTracker/tracker/run.py "
-
-
-
-
-
-
 hit_plane_x = [hit_offset_x-box_size[0]*0.5, hit_offset_x+box_size[0]*0.5]
 hit_plane_y = [hit_offset_y-box_size[1]*0.5, hit_offset_y+box_size[1]*0.5]
 hit_plane_z = hit_offset_z
 hit_time_offset = np.linalg.norm([decay_volume_middle_height - cms_z, hit_offset_x + box_size[0]*0.5])/0.3 - (cosmic_radius)/0.3
 
+seed = 1
 rng = np.random.default_rng(seed)
 
+# --------------------------------------------------------------------------------
+# Sim and tracker executable
+simulation='/home/owhgabri/scratch/Mu-Background/Mu-Simulation/simulation '
 
 # Handle arguments and parameters
 path = "parma_cpp/GeneOut/"
@@ -46,7 +39,7 @@ if len(sys.argv)>1:
 path = os.path.abspath(path)
 output_name = path + "/cosmic_filereader"
 filenames = glob.glob(path+"/generation*.out")
-sim_output_path = "parma_cpp/GeneOut/"
+sim_output_path = "cosmic/parma_cpp/GeneOut/"
 if len(sys.argv)>2:
     sim_output_path = sys.argv[2]
 debug = True
@@ -59,6 +52,7 @@ if len(sys.argv)>3:
     elif sys.argv[3]=="Run":
         run=True
 
+# --------------------------------------------------------------------------------
 
 def cosmic_info(filename):
     with open(filename, "r") as fin:
@@ -95,7 +89,6 @@ def generate_sim_script_filereader(events_properties_filename, script_path=None)
                 except:
                     print("Could not read number of events")
             
-
     script = "/det/select Box \n"
     script+= "/gen/select file_reader \n"
     script+= f"/gen/file_reader/pathname {events_properties_filename}\n"
@@ -109,10 +102,9 @@ def generate_sim_script_filereader(events_properties_filename, script_path=None)
     return script_path
 
 
-
-import os
 def insert (source_str, insert_str, pos):
     return source_str[:pos]+insert_str+source_str[pos:]
+
 def submit_script(script, job_name, run_number, hours, log_dir, cores=1, ram=2048, slurm_account="", slurm_partition="", debug=True, verbose=False):
     slurm_command = \
     f"""#!/bin/bash
@@ -144,6 +136,7 @@ def submit_script(script, job_name, run_number, hours, log_dir, cores=1, ram=204
     if not debug:
         os.system(full_command)
 
+# --------------------------------------------------------------------------------
 # Particle ID (Particle ID, 0:neutron, 1-28:H-Ni, 29-30:muon+-, 31:e-, 32:e+, 33:photon)
 pid_to_g4pid = {0:2112,
                 1:2212,
@@ -214,8 +207,7 @@ for i in range(len(filenames)):
 print("Total events", total_events)
 np.save(path + f"/combined_{total_events}_events", data_combined)
 
-
-
+# --------------------------------------------------------------------------------
 # Convert to filereader output
 filename_filereader=output_name+".txt"
 with open(filename_filereader, "w") as file:
@@ -225,18 +217,14 @@ with open(filename_filereader, "w") as file:
         file.write(f'E {i}  \t {data_combined["pid"][i]}\t  0.0 0.0 0.0 0.0 0.0 0.0 0.0\n')
         # Decay products
         file.write(f'P {data_combined["pid"][i]}  {data_combined["x"][i]} {data_combined["y"][i]} {data_combined["z"][i]} {data_combined["px"][i]} {data_combined["py"][i]} {data_combined["pz"][i]} {data_combined["t"][i]}\n')
-        
 
-        
-        
+# --------------------------------------------------------------------------------
 # Make a Geant4 script 
 sim_script_filename = generate_sim_script_filereader(filename_filereader)
 
-
-
-
+# --------------------------------------------------------------------------------
 # Make a bash script to call Geant and submit jobs
-run_script = f"{simulation} -j1 -q  -o {sim_output_path}  -s {sim_script_filename} "
+run_script = f"{simulation} -q  -o {sim_output_path}  -s {sim_script_filename} "
 job_script=f"""
 export PYTHIA8=/project/def-mdiamond/tomren/mathusla/pythia8308
 export PYTHIA8DATA=$PYTHIA8/share/Pythia8/xmldoc
