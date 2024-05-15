@@ -19,11 +19,11 @@ fi
 # MG5_Dir is where the madgraph TOP DIRECTORY is
 MG5_Dir=${1}
 # Scripts is the directory where the Base MadGraph Script is
-Scripts="Mu-Simulation/VectorExtraction/MadGraphScripts"
+Scripts="../Mu-Simulation/VectorExtraction/MadGraphScripts"
 # Extractor is the directory where the python extractor is
-Extractor="Mu-Simulation/VectorExtraction/run_muon_extract.py"
+Extractor="../Mu-Simulation/VectorExtraction/run_muon_extract.py"
 # Combiner is the directory where the python extractor is
-Combiner="Mu-Simulation/VectorExtraction/combine_muon_data.py"
+Combiner="../Mu-Simulation/VectorExtraction/combine_muon_data.py"
 
 # ---------------------------------------------------------------------------------------
 # TEMPORARY DIRECTORIES FOR MADGRAPH
@@ -36,7 +36,7 @@ MGDataDir="${SLURM_TMPDIR}/MadGraphOutput"
 HepMCToText="${SLURM_TMPDIR}/HepMCToText"
 #Location of the combined data files and scripts to be passed to Geant4
 G4Input="data/G4Input"
-simulation=`realpath Mu-Simulation/simulation`
+simulation=`realpath ../Mu-Simulation/simulation`
 
 # ---------------------------------------------------------------------------------------
 # Making MadGraph high I/O directories 

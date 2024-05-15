@@ -29,7 +29,9 @@ rng = np.random.default_rng(seed)
 
 # --------------------------------------------------------------------------------
 # Sim and tracker executable
-simulation='/home/owhgabri/scratch/Mu-Background/Mu-Simulation/simulation '
+simulation='/home/owhgabri/scratch/My_Github/Mu-Simulation/simulation '
+digitizer='/home/owhgabri/scratch/My_Github/Mu-Simulation/digitizer '
+#tracker2="python3 /home/tomren/jupyter/pyTracker/tracker/run.py "
 
 # Handle arguments and parameters
 path = "parma_cpp/GeneOut/"
