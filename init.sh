@@ -15,7 +15,7 @@ pushd ..
 if [ ! -f Mu-Simulation/simulation ]; then
 	echo ""
 	echo "Simulation executable not found, building the simulation/digitizer."
-	git clone https://github.com/EdmondRen/Mu-Simulation.git
+	git clone https://github.com/Gabymeister/Mu-Simulation.git
 	cd Mu-Simulation
 	./install --cmake
 	./install_digitizer --cmake
