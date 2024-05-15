@@ -1,3 +1,0 @@
-#!/bin/bash
-
-/home/ag1378/cmslink/MATHUSLA/3_hermetic_floor/Mu-Simulation/./simulation -o /home/ag1378/cmslink/MATHUSLA/simulation_service/projects/background/data/ -s /home/ag1378/cmslink/MATHUSLA/3_hermetic_floor/Mu-Simulation/studies/box/background/run_pythia_w.mac
