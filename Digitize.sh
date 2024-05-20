@@ -3,6 +3,8 @@
 #SBATCH --account=def-mdiamond
 #SBATCH --mem=2G
 
+# ${1} 
+
 # ------------------------------------------------------------------------------------------------
 # Cosmic variables
 cosmic=false
@@ -19,12 +21,12 @@ while getopts "c:" opt; do
 			;;
 		\?)
 			echo "Invalid Option: ${OPTARG}"
-			echo "Usage: <MacroDirectory> <DigitizerOutput> -c <cosmic directory>"
+			echo "Usage: <LHC_root_directory> -c <cosmic directory>"
 			exit 1
 			;;
 		:)
 			echo "-c requires argument: ${OPTARG}"
-			echo "Usage: <MacroDirectory> <DigitizerOutput> -c <cosmic directory>"
+			echo "Usage: <LHC_root_directory> -c <cosmic directory>"
 			exit 1
 			;;
 	esac
@@ -50,13 +52,19 @@ pushd ${digitizer_dir}
 
 # Run the Digitizer
 echo "Running Digitizer"
+i=0
 # Don't know exactly the name of the G4 output root file (dependent on date)
 find "${1}" -type f -name "*.root" | while read -r file; do
-	if $cosmic; then
-		./digitizer -l $file -c $cosmic_dir  -o ${2}
-	else 
-		./digitizer -l $file  -o ${2}
+	if [ ! -d ${PATH_Digi_out}/$i ]; then
+		mkdir ${PATH_Digi_out}/$i
 	fi
+
+	if $cosmic; then
+		./digitizer -l $file -c $cosmic_dir  -o ${PATH_Digi_out}/$i
+	else 
+		./digitizer -l $file  -o ${PATH_Digi_out}/$i
+	fi
+	((i+=1))
 done
 
 popd

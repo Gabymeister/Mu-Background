@@ -30,8 +30,8 @@ fi
 popd
 # Now we have the simulation and digitizer. Make an alias for them
 # The tracker can be run directly with command pytracker
-export simulation=`realpath ../Mu-Simulation/simulation`
-export digitizer=`realpath ../Mu-Simulation/digitizer`
+export simulation_dir=`realpath ../Mu-Simulation`
+export digitizer_dir=`realpath ../Mu-Simulation`
 
 
 #------------------------------------------------------------------
@@ -67,4 +67,14 @@ mkdir -p $PATH_MG5_out
 export PATH_MG5_in=$PATH_MG5_in
 export PATH_MG5_out=$PATH_MG5_out
 
+
+# ----------------------------------------------------------------
+# Digitizer
+
+
+PATH_Digi_out=$PATH_DATA/DigiOutput # Location of the digitized output
+
+mkdir -p $PATH_Digi_out
+
+export PATH_Digi_out=$PATH_Digi_out
 

@@ -19,11 +19,11 @@ fi
 # MG5_Dir is where the madgraph TOP DIRECTORY is
 MG5_Dir=${1}
 # Scripts is the directory where the Base MadGraph Script is
-Scripts="../Mu-Simulation/VectorExtraction/MadGraphScripts"
+Scripts=`realpath ../Mu-Simulation/VectorExtraction/MadGraphScripts`
 # Extractor is the directory where the python extractor is
-Extractor="../Mu-Simulation/VectorExtraction/run_muon_extract.py"
+Extractor=`realpath ../Mu-Simulation/VectorExtraction/run_muon_extract.py`
 # Combiner is the directory where the python extractor is
-Combiner="../Mu-Simulation/VectorExtraction/combine_muon_data.py"
+Combiner=`realpath ../Mu-Simulation/VectorExtraction/combine_muon_data.py`
 
 # ---------------------------------------------------------------------------------------
 # TEMPORARY DIRECTORIES FOR MADGRAPH
@@ -58,6 +58,9 @@ module load root/6.26.06
 module load eigen/3.3.7
 module load geant4/10.7.3
 module load geant4-data/10.7.3
+echo "PYTHIA8 paths:"
+echo $PYTHIA8
+echo $PYTHIA8DATA
 
 # ---------------------------------------------------------------------------------------
 # Running MadGraph

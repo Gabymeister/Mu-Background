@@ -1,12 +1,16 @@
 # ${1} is the location of the madgraph executable.
-# ${2} is the minimum pT cutoff you want to apply (in MeV) (normally 20k)a
+# ${2} is the minimum pT cutoff you want to apply (in MeV) (normally 20k)
+# ${3} is the number of MG5 events to run*10 thousand (i.e. 5 -> 50000 events)
+
+# NOTE: THIS SCRIPT MUST BE RUN WITHIN A SLURM JOB. MG5 Output is too large otherwise
 
 # Usage
-if [ $# -ne 2 ]; then
-	echo "Usage: $0 <MG5 TopDirectory> <pT Cutoff>"
+if [ $# -ne 3 ]; then
+	echo "Usage: $0 <MG5 TopDirectory> <pT Cutoff (MeV)> <RUN_NUMBER*10k>"
 	echo "Note: MG5 TopDirectory should be the ABSOLUTE path"
 	exit 1
 fi
+
 # ---------------------------------------------------------------------------------------
 # PATHS TO EXECUTABLES
 # MG5_Dir is where the madgraph TOP DIRECTORY is
@@ -51,15 +55,14 @@ module load geant4-data/10.7.3
 # ---------------------------------------------------------------------------------------
 # Running MadGraph
 # Two identifiers: One is the MG5 set number, the other is the Job number
-# Each set number corresponds to about 25 hours (check this)
-NumSets=2
+NumSets=${3}
 for (( c=0; c<NumSets; c++ )) # Generate NumSets*10000 MadGraph Events
 do
 
   # Create the MadGraph Scripts for each set of each job
   echo "Creating MadGraph Scripts"
   seedval=$((c + NumSets * SLURM_ARRAY_TASK_ID))
-  cp "${Scripts}/test.txt" "${MadGraphScripts}/sm_muprod_wz_${SLURM_ARRAY_TASK_ID}_${c}.txt"
+  cp "${Scripts}/sm_muprod_wz.txt" "${MadGraphScripts}/sm_muprod_wz_${SLURM_ARRAY_TASK_ID}_${c}.txt"
   sed -i "14s/.*/set iseed = ${seedval}/" "${MadGraphScripts}/sm_muprod_wz_${SLURM_ARRAY_TASK_ID}_${c}.txt"
   sed -i "5s|.*|output ${MGDataDir}/proc_sm_muprod_wz_matched_${SLURM_ARRAY_TASK_ID}_${c}|" "${MadGraphScripts}/sm_muprod_wz_${SLURM_ARRAY_TASK_ID}_${c}.txt"
   sed -i "6s|.*|launch ${MGDataDir}/proc_sm_muprod_wz_matched_${SLURM_ARRAY_TASK_ID}_${c}|" "${MadGraphScripts}/sm_muprod_wz_${SLURM_ARRAY_TASK_ID}_${c}.txt"
@@ -104,5 +107,7 @@ module load geant4/10.7.3
 module load geant4-data/10.7.3
 # Run Geant4
 echo "Running Geant4"
-echo "simulation: ${simulation}"
-${simulation} -s ${PATH_MG5_in}/bkg_muon_${SLURM_ARRAY_TASK_ID}.mac -o ${PATH_MG5_out}/bkg_muon_${SLURM_ARRAY_TASK_ID}
+echo "simulation directory: ${simulation_dir}"
+pushd ${simulation_dir}
+./simulation -s ${PATH_MG5_in}/bkg_muon_${SLURM_ARRAY_TASK_ID}.mac -o ${PATH_MG5_out}/bkg_muon_${SLURM_ARRAY_TASK_ID}
+popd
