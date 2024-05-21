@@ -44,6 +44,48 @@ source init.sh
 
 # 2. Details about the background study
 ## 2.1 Collider background
+
+### Setting Up MadGraph and Pythia8 ###
+
+This version of the code uses MadGraph v3.5.1. MadGraph is a self-contained framework for simulating SM and BSM phenomenology, computing cross-sections, and generating hard-events. Pythia8 may also be installed in MadGraph, which simulates multi-state parton showers.
+
+Reference:
+
+    J. Alwall et al, "The automated computation of tree-level and next-to-leading order differential cross sections, and their matching to parton shower simulations"
+
+    Bierlich, Christian, et al. "A comprehensive guide to the physics and usage of PYTHIA 8.3." SciPost Physics Codebases (2022): 008.
+
+Usage: 
+Madgraph may be downloaded from this link: http://launchpad.net/madgraph5/3.0/3.5.x/+download/MG5_aMC_v3.5.4.tar.gz
+
+Unzip it:
+
+    gzip -d MG5_aMC_v3.5.4.tar.gz
+
+Then you can run it using the command
+
+    ./MG5_aMC_v3_5_4/bin/mg5_aMC
+
+This should provide an interactive session. The first time this is done, run the command
+
+    install pythia8
+
+Then type "exit." This will permanently install pythia8 into the self-contained MadGraph framework.
+
+It is recommended before running the program to set the appropriate paths, as certain cross-sections may conflict between your default pythia version and MadGraph's version. One should set the following path before running MadGraph with Pythia8:
+
+    export PYTHIA8=/project/def-mdiamond/tomren/mathusla/pythia8308
+    export PYTHIA8DATA="MG5_DIR/HEPTools/pythia8/share/Pythia8/xmldoc"
+
+where `MG5_DIR` is the MadGraph Directory (so from before, `MG5_DIR=MG5_aMC_v3_5_4`)
+
+### Script for Running MadGraph ###
+
+The script `run_MG5.sh` will run a series of MadGraph scripts. The script that it references can be found in the other repository "Mu-Simulation" found at https://github.com/Gabymeister/Mu-Simulation in the "VectorExtraction/MadGraphScripts directory." This will generate 50k MadGraph events with parton showering from pythia8, extract muon events, and reformat them for input into the Mu-Simulation. These will be stored in the "data/G4Input" directory. NOTE THAT THIS DIRECTORY MUST BE MADE BY THE USER FIRST. The script takes two inputs. The first is the Madgraph directory, the second is the minimum pT (in MeV) the user wishes to simulate using MadGraph.
+
+### Script for Simulating the LHC ###
+`run_lhc_muon.sh` is similar to `run_MG5.sh`, but it also runs the Geant4 "Mu-Simulation" as well. It stores the heavy Madgraph output files in the slurm job directory, so it MUST be submitted as a job script unless the user modifies it. It does not store the MadGraph output, which is deleted once the job is finished. It immediately runs the Geant4 MATHUSLA simulation, which is then stored in the shared MATHUSLA directory on ComputeCanada. This would be in `MATHUSLA/SimOutput/MG5`. The script takes three arguments. First, is the location of the MadGraph directory, second is the minimum pT in MeV, third is the number of MadGraph events to generate in ten-thousands (so 5 would generate 50k MG5 events).
+
 ## 2.2 Cosmic ray background
 
 
@@ -143,6 +185,9 @@ Example 1: **Use this script to generate all particles**:  `./run_cosmic.sh -n 1
 
 Example 2: **Use this script to generate dedicated proton simulation for K-Long background study**: `./run_cosmic.sh -n 1000   -r 1   -s Run   -p 1`
 
+## 2.3 Full Simulation ##
+
+`full_sim.sh` executes both the LHC background and the cosmic background. It currently generates 50k MG5 events and 10k cosmic events. These are then sent to the Digitizer in the Mu-Simulation to be combined into a single file. Note that running 10 jobs will still generate 10 different root files once the digitizer is finished. 
 
 # Reconstruction
 
