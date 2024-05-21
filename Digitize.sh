@@ -35,8 +35,9 @@ shift $((OPTIND -1))
 
 # ------------------------------------------------------------------------------------------------
 # Checking and setting files/variables
-if [ $# -ne 2 ]; then
-	echo "Usage: <LHCDataDirectory> <OutputDirectory> -c <CosmicDataDirectory>"
+if [ $# -ne 1 ]; then
+	echo $#
+	echo "Usage: -c <CosmicDataDirectory> <LHCDataDirectory>"
 	exit 1
 fi
 # sourcing init.sh"
@@ -60,6 +61,7 @@ find "${1}" -type f -name "*.root" | while read -r file; do
 	fi
 
 	if $cosmic; then
+		echo "running cosmic"
 		./digitizer -l $file -c $cosmic_dir  -o ${PATH_Digi_out}/$i
 	else 
 		./digitizer -l $file  -o ${PATH_Digi_out}/$i

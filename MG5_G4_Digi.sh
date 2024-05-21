@@ -107,13 +107,17 @@ module load geant4/10.7.3
 module load geant4-data/10.7.3
 # Run Geant4
 echo "Running Geant4"
-${simulation} -q -s ${G4SimFiles}/bkg_muon_${SLURM_ARRAY_TASK_ID}.mac -o ${G4DataDir}/bkg_muon_${SLURM_ARRAY_TASK_ID}
+pushd ${simulation_dir}
+./simulation -q -s ${G4SimFiles}/bkg_muon_${SLURM_ARRAY_TASK_ID}.mac -o ${G4DataDir}/bkg_muon_${SLURM_ARRAY_TASK_ID}
+popd
+
+cp par_cards/par_card.txt ${simulation_dir}/Digitizer/run
 
 # Run the Digitizer
 echo "Running Digitizer"
 # Don't know exactly the name of the G4 output root file (dependent on date)
 find "${G4DataDir}/bkg_muon_${SLURM_ARRAY_TASK_KD}" -type f -name "*.root" | while read -r file; do
-  ${digitizer} $file ${DigiDataDir}
+  ${digitizer} -l $file -o ${DigiDataDir}
   rm -rf "data/tmp_${SLURM_ARRAY_TASK_ID}"
 done
 
