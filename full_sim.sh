@@ -8,9 +8,9 @@ source init.sh
 
 # one cosmic root file per lhc root file
 echo "Generating LHC root file"
-./run_lhc_muon.sh /home/owhgabri/scratch/MATHUSLA/MG5_aMC_v3_5_1 30000 1
+./run_lhc_muon.sh /home/owhgabri/scratch/MATHUSLA/MG5_aMC_v3_5_1 30000 5
 echo "Generating cosmic root file"
-./run_cosmic.sh -n 10000 -r ${SLURM_ARRAY_TASK_ID} -f -s Run
+./run_cosmic.sh -n 30000 -r ${SLURM_ARRAY_TASK_ID} -f -s Run
 
 echo "Digitizing LHC and Cosmic files"
 if [ ! -d digi_out/${SLURM_ARRAY_TASK_ID} ]; then

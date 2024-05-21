@@ -187,7 +187,7 @@ Example 2: **Use this script to generate dedicated proton simulation for K-Long 
 
 ## 2.3 Full Simulation ##
 
-`full_sim.sh` executes both the LHC background and the cosmic background. It currently generates 50k MG5 events and 10k cosmic events. These are then sent to the Digitizer in the Mu-Simulation to be combined into a single file. Note that running 10 jobs will still generate 10 different root files once the digitizer is finished. 
+`full_sim.sh` executes both the LHC background and the cosmic background. It currently generates 50k MG5 events and 30k cosmic events. These are then sent to the Digitizer in the Mu-Simulation to be combined into a single file. Note that running 10 jobs will still generate 10 different root files once the digitizer is finished. 
 
 # Reconstruction
 
