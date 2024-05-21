@@ -1,6 +1,5 @@
 PATH_DATA="/project/rrg-mdiamond/data/MATHUSLA"
 
-
 #------------------------------------------------------------------
 # Dependencies
 # PYTHIA is in Tom's home directory
@@ -16,10 +15,10 @@ pushd ..
 if [ ! -f Mu-Simulation/simulation ]; then
 	echo ""
 	echo "Simulation executable not found, building the simulation/digitizer."
-	git clone https://github.com/EdmondRen/Mu-Simulation.git
+	git clone https://github.com/Gabymeister/Mu-Simulation.git
 	cd Mu-Simulation
 	./install --cmake
-	./install_digitizer
+	./install_digitizer --cmake
 fi
 if ! command -v pytracker &> /dev/null; then
 	echo ""
@@ -31,10 +30,8 @@ fi
 popd
 # Now we have the simulation and digitizer. Make an alias for them
 # The tracker can be run directly with command pytracker
-simulation=`realpath ../Mu-Simulation/simulation`
-digitizer=`realpath ../Mu-Simulation/digitizer`
-
-
+export simulation_dir=`realpath ../Mu-Simulation`
+export digitizer_dir=`realpath ../Mu-Simulation`
 
 
 #------------------------------------------------------------------
@@ -58,7 +55,26 @@ if [ ! -f cosmic/parma_cpp/cosmic_gen ]; then
 fi
 # Set the output path of PARMA
 ln -s  $PATH_COSMIC_tmp cosmic/parma_cpp/GeneOut
+
 # ----------------------------------------------------------------
+# LHC (MadGraph)
+PATH_MG5_in=$PATH_DATA/SimInput/MG5 # Location of scripts for MadGraph
+PATH_MG5_out=$PATH_DATA/SimOutput/MG5 #Location of generated text files for G4
+
+mkdir -p $PATH_MG5_in
+mkdir -p $PATH_MG5_out
+
+export PATH_MG5_in=$PATH_MG5_in
+export PATH_MG5_out=$PATH_MG5_out
 
 
+# ----------------------------------------------------------------
+# Digitizer
+
+
+PATH_Digi_out=$PATH_DATA/DigiOutput # Location of the digitized output
+
+mkdir -p $PATH_Digi_out
+
+export PATH_Digi_out=$PATH_Digi_out
 

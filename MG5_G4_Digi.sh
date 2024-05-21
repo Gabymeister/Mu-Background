@@ -1,29 +1,33 @@
+#!/bin/bash
+#SBATCH --time=6:00:00
+#SBATCH --account=def-mdiamond
+#SBATCH --array=1-10
+#SBATCH --mem=2G
+
 # ${1} is the location of the madgraph executable.
-# ${2} is the minimum pT cutoff you want to apply (in MeV) (normally 20k)
-# ${3} is the number of MG5 events to run*10 thousand (i.e. 5 -> 50000 events)
+# ${2} is the number of times you want to run madgraph (10k events each)
+# ${3} is the minimum pT cutoff you want to apply (in MeV) (normally 20k)
 
-# NOTE: THIS SCRIPT MUST BE RUN WITHIN A SLURM JOB. MG5 Output is too large otherwise
-
-# Usage
 if [ $# -ne 3 ]; then
-	echo "Usage: $0 <MG5 TopDirectory> <pT Cutoff (MeV)> <RUN_NUMBER*10k>"
+	echo "Usage: $0 <MG5 TopDirectory> <RunNumber> <pT Cutoff>"
 	echo "Note: MG5 TopDirectory should be the ABSOLUTE path"
 	exit 1
 fi
 
-# ---------------------------------------------------------------------------------------
-# PATHS TO EXECUTABLES
 # MG5_Dir is where the madgraph TOP DIRECTORY is
 MG5_Dir=${1}
-# Scripts is the directory where the Base MadGraph Script is
-Scripts="../Mu-Simulation/VectorExtraction/MadGraphScripts"
-# Extractor is the directory where the python extractor is
-Extractor="../Mu-Simulation/VectorExtraction/run_muon_extract.py"
-# Combiner is the directory where the python extractor is
-Combiner="../Mu-Simulation/VectorExtraction/combine_muon_data.py"
 
-# ---------------------------------------------------------------------------------------
-# TEMPORARY DIRECTORIES FOR MADGRAPH
+# Scripts is the directory where the Base MadGraph Script is
+Scripts="Mu-Simulation/VectorExtraction/MadGraphScripts"
+# Extractor is the directory where the python extractor is
+Extractor="Mu-Simulation/VectorExtraction/run_muon_extract.py"
+# Combiner is the directory where the python extractor is
+Combiner="Mu-Simulation/VectorExtraction/combine_muon_data.py"
+# G4SimFiles is where the extracted muons and macros will be stored
+G4SimFiles="data/G4SimFiles"
+# G4DataDir is the directory where the Geant4 root files are created
+G4DataDir="data/G4Output"
+
 #MadGraphScripts is the directory where the created scripts will be stored
 MadGraphScripts="${SLURM_TMPDIR}/MadGraphScripts"
 # DataDir is the directory where the MadGraph folders are created
@@ -32,37 +36,35 @@ MGDataDir="${SLURM_TMPDIR}/MadGraphOutput"
 #but before being combined into one file.
 HepMCToText="${SLURM_TMPDIR}/HepMCToText"
 
-# ---------------------------------------------------------------------------------------
 # Making MadGraph high I/O directories 
 mkdir "${SLURM_TMPDIR}/MadGraphScripts"
 mkdir "${SLURM_TMPDIR}/MadGraphOutput"
 mkdir "${SLURM_TMPDIR}/HepMCToText"
 
-# Set the right version of pythia for madgraph
-echo "Exporting PYTHIA8"
-echo "Running initsim"
-export PYTHIA8=/project/def-mdiamond/tomren/mathusla/pythia8308
-export PYTHIA8DATA="${MG5_Dir}/HEPTools/pythia8/share/Pythia8/xmldoc"
-PATH=$PATH:/project/def-mdiamond/tomren/mathusla/dlib-19.24/install
-module load StdEnv/2020
-module load qt/5.12.8
-module load gcc/9.3.0
-module load root/6.26.06
-module load eigen/3.3.7
-module load geant4/10.7.3
-module load geant4-data/10.7.3
+if [ ! -d "${G4DataDir}" ]; then
+	mkdir ${G4DataDir}
+fi
 
-# ---------------------------------------------------------------------------------------
-# Running MadGraph
+if [ ! -d "${G4SimFiles}" ]; then
+	mkdir ${G4SimFiles}
+fi
+
+# Sourcing init.sh
+source init.sh
+
 # Two identifiers: One is the MG5 set number, the other is the Job number
-NumSets=${3}
+# Each set number corresponds to about 25 hours (check this)
+NumSets=${2}
 for (( c=0; c<NumSets; c++ )) # Generate NumSets*10000 MadGraph Events
 do
+  # Set the right version of pythia for madgraph
+  echo "Exporting PYTHIA8"
+  export PYTHIA8DATA="${MG5_Dir}/HEPTools/pythia8/share/Pythia8/xmldoc"
 
   # Create the MadGraph Scripts for each set of each job
   echo "Creating MadGraph Scripts"
   seedval=$((c + NumSets * SLURM_ARRAY_TASK_ID))
-  cp "${Scripts}/sm_muprod_wz.txt" "${MadGraphScripts}/sm_muprod_wz_${SLURM_ARRAY_TASK_ID}_${c}.txt"
+  cp "${Scripts}/test.txt" "${MadGraphScripts}/sm_muprod_wz_${SLURM_ARRAY_TASK_ID}_${c}.txt"
   sed -i "14s/.*/set iseed = ${seedval}/" "${MadGraphScripts}/sm_muprod_wz_${SLURM_ARRAY_TASK_ID}_${c}.txt"
   sed -i "5s|.*|output ${MGDataDir}/proc_sm_muprod_wz_matched_${SLURM_ARRAY_TASK_ID}_${c}|" "${MadGraphScripts}/sm_muprod_wz_${SLURM_ARRAY_TASK_ID}_${c}.txt"
   sed -i "6s|.*|launch ${MGDataDir}/proc_sm_muprod_wz_matched_${SLURM_ARRAY_TASK_ID}_${c}|" "${MadGraphScripts}/sm_muprod_wz_${SLURM_ARRAY_TASK_ID}_${c}.txt"
@@ -76,23 +78,21 @@ do
 
   # Run the extractor
   echo "Extracting Muons"
-  python3 ${Extractor} "${HepMCDir}/Events/run_01/tag_1_pythia8_events.hepmc" "${HepMCToText}/bkg_muon_${SLURM_ARRAY_TASK_ID}_${c}.txt" ${2}
+  python3 ${Extractor} "${HepMCDir}/Events/run_01/tag_1_pythia8_events.hepmc" "${HepMCToText}/bkg_muon_${SLURM_ARRAY_TASK_ID}_${c}.txt" ${3}
 
   # Delete the data folder
   echo "Removing data folder"
   rm -rf "${HepMCDir}"
 done # Generated NumSets text files of 10000 muon events
 
-# ---------------------------------------------------------------------------------------
  # Combine the Text Files into One/Create Geant4 scripts
 echo "Combining Text Files"
-python3 ${Combiner} "${PATH_MG5_in}" "${SLURM_ARRAY_TASK_ID}" "${NumSets}" "${HepMCToText}"
+python3 ${Combiner} "${G4SimFiles}" "${SLURM_ARRAY_TASK_ID}" "${NumSets}" "${HepMCToText}"
 for (( c=0; c<NumSets; c++ ))
 do
   rm "${HepMCToText}/bkg_muon_${SLURM_ARRAY_TASK_ID}_${c}.txt"
 done
 
-# ---------------------------------------------------------------------------------------
 # Run the function initsim
 echo "Running initsim"
 export PYTHIA8=/project/def-mdiamond/tomren/mathusla/pythia8308
@@ -107,7 +107,17 @@ module load geant4/10.7.3
 module load geant4-data/10.7.3
 # Run Geant4
 echo "Running Geant4"
-echo "simulation directory: ${simulation_dir}"
 pushd ${simulation_dir}
-./simulation -s ${PATH_MG5_in}/bkg_muon_${SLURM_ARRAY_TASK_ID}.mac -o ${PATH_MG5_out}/bkg_muon_${SLURM_ARRAY_TASK_ID}
+./simulation -q -s ${G4SimFiles}/bkg_muon_${SLURM_ARRAY_TASK_ID}.mac -o ${G4DataDir}/bkg_muon_${SLURM_ARRAY_TASK_ID}
 popd
+
+cp par_cards/par_card.txt ${simulation_dir}/Digitizer/run
+
+# Run the Digitizer
+echo "Running Digitizer"
+# Don't know exactly the name of the G4 output root file (dependent on date)
+find "${G4DataDir}/bkg_muon_${SLURM_ARRAY_TASK_KD}" -type f -name "*.root" | while read -r file; do
+  ${digitizer} -l $file -o ${DigiDataDir}
+  rm -rf "data/tmp_${SLURM_ARRAY_TASK_ID}"
+done
+

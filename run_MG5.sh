@@ -1,26 +1,29 @@
-# ${1} is the location of the madgraph executable.
-# ${2} is the minimum pT cutoff you want to apply (in MeV) (normally 20k)
-# ${3} is the number of MG5 events to run*10 thousand (i.e. 5 -> 50000 events)
+#!/bin/bash
+#SBATCH --time=6:00:00
+#SBATCH --account=def-mdiamond
+#SBATCH --array=1-100
+#SBATCH --mem=2G
 
-# NOTE: THIS SCRIPT MUST BE RUN WITHIN A SLURM JOB. MG5 Output is too large otherwise
+
+# ${1} is the location of the madgraph executable.
+# ${2} is the minimum pT cutoff you want to apply (in MeV) (normally 20k)a
 
 # Usage
-if [ $# -ne 3 ]; then
-	echo "Usage: $0 <MG5 TopDirectory> <pT Cutoff (MeV)> <RUN_NUMBER*10k>"
+if [ $# -ne 2 ]; then
+	echo "Usage: $0 <MG5 TopDirectory> <pT Cutoff>"
 	echo "Note: MG5 TopDirectory should be the ABSOLUTE path"
 	exit 1
 fi
-
 # ---------------------------------------------------------------------------------------
 # PATHS TO EXECUTABLES
 # MG5_Dir is where the madgraph TOP DIRECTORY is
 MG5_Dir=${1}
 # Scripts is the directory where the Base MadGraph Script is
-Scripts="../Mu-Simulation/VectorExtraction/MadGraphScripts"
+Scripts=`realpath ../Mu-Simulation/VectorExtraction/MadGraphScripts`
 # Extractor is the directory where the python extractor is
-Extractor="../Mu-Simulation/VectorExtraction/run_muon_extract.py"
+Extractor=`realpath ../Mu-Simulation/VectorExtraction/run_muon_extract.py`
 # Combiner is the directory where the python extractor is
-Combiner="../Mu-Simulation/VectorExtraction/combine_muon_data.py"
+Combiner=`realpath ../Mu-Simulation/VectorExtraction/combine_muon_data.py`
 
 # ---------------------------------------------------------------------------------------
 # TEMPORARY DIRECTORIES FOR MADGRAPH
@@ -31,12 +34,16 @@ MGDataDir="${SLURM_TMPDIR}/MadGraphOutput"
 #HepMCToText is where the text files are stored after being converted from Hepmc,
 #but before being combined into one file.
 HepMCToText="${SLURM_TMPDIR}/HepMCToText"
+#Location of the combined data files and scripts to be passed to Geant4
+G4Input="data/G4Input"
+simulation=`realpath ../Mu-Simulation/simulation`
 
 # ---------------------------------------------------------------------------------------
 # Making MadGraph high I/O directories 
 mkdir "${SLURM_TMPDIR}/MadGraphScripts"
 mkdir "${SLURM_TMPDIR}/MadGraphOutput"
 mkdir "${SLURM_TMPDIR}/HepMCToText"
+mkdir "${SLURM_TMPDIR}/G4Input"
 
 # Set the right version of pythia for madgraph
 echo "Exporting PYTHIA8"
@@ -51,11 +58,15 @@ module load root/6.26.06
 module load eigen/3.3.7
 module load geant4/10.7.3
 module load geant4-data/10.7.3
+echo "PYTHIA8 paths:"
+echo $PYTHIA8
+echo $PYTHIA8DATA
 
 # ---------------------------------------------------------------------------------------
 # Running MadGraph
 # Two identifiers: One is the MG5 set number, the other is the Job number
-NumSets=${3}
+# Each set number corresponds to about 25 hours (check this)
+NumSets=5
 for (( c=0; c<NumSets; c++ )) # Generate NumSets*10000 MadGraph Events
 do
 
@@ -86,28 +97,8 @@ done # Generated NumSets text files of 10000 muon events
 # ---------------------------------------------------------------------------------------
  # Combine the Text Files into One/Create Geant4 scripts
 echo "Combining Text Files"
-python3 ${Combiner} "${PATH_MG5_in}" "${SLURM_ARRAY_TASK_ID}" "${NumSets}" "${HepMCToText}"
+python3 ${Combiner} "${G4Input}" "${SLURM_ARRAY_TASK_ID}" "${NumSets}" "${HepMCToText}"
 for (( c=0; c<NumSets; c++ ))
 do
   rm "${HepMCToText}/bkg_muon_${SLURM_ARRAY_TASK_ID}_${c}.txt"
 done
-
-# ---------------------------------------------------------------------------------------
-# Run the function initsim
-echo "Running initsim"
-export PYTHIA8=/project/def-mdiamond/tomren/mathusla/pythia8308
-export PYTHIA8DATA=$PYTHIA8/share/Pythia8/xmldoc
-PATH=$PATH:/project/def-mdiamond/tomren/mathusla/dlib-19.24/install
-module load StdEnv/2020
-module load qt/5.12.8
-module load gcc/9.3.0
-module load root/6.26.06
-module load eigen/3.3.7
-module load geant4/10.7.3
-module load geant4-data/10.7.3
-# Run Geant4
-echo "Running Geant4"
-echo "simulation directory: ${simulation_dir}"
-pushd ${simulation_dir}
-./simulation -s ${PATH_MG5_in}/bkg_muon_${SLURM_ARRAY_TASK_ID}.mac -o ${PATH_MG5_out}/bkg_muon_${SLURM_ARRAY_TASK_ID}
-popd
