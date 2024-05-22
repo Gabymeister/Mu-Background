@@ -1,29 +1,33 @@
-# ${1} is the location of the madgraph executable.
-# ${2} is the minimum pT cutoff you want to apply (in MeV) (normally 20k)
-# ${3} is the number of MG5 events to run*10 thousand (i.e. 5 -> 50000 events)
+# ${1} is the minimum pT cutoff you want to apply (in MeV) (normally 20k)
+# ${2} is the number of MG5 events to run*10 thousand (i.e. 5 -> 50000 events)
 
 # NOTE: THIS SCRIPT MUST BE RUN WITHIN A SLURM JOB. MG5 Output is too large otherwise
 
 # Usage
-if [ $# -ne 3 ]; then
-	echo "Usage: $0 <MG5 TopDirectory> <pT Cutoff (MeV)> <RUN_NUMBER*10k>"
-	echo "Note: MG5 TopDirectory should be the ABSOLUTE path"
+if [ $# -ne 2 ]; then
+	echo "Usage: $0  <pT Cutoff (MeV)> <RUN_NUMBER*10k>" # Print help message if number of arguments is more than 2
 	exit 1
 fi
+pTcut=${1}
+NumSets=${2}
+
 
 # ---------------------------------------------------------------------------------------
 # PATHS TO EXECUTABLES
-# MG5_Dir is where the madgraph TOP DIRECTORY is
-MG5_Dir=${1}
 # Scripts is the directory where the Base MadGraph Script is
-Scripts="../Mu-Simulation/VectorExtraction/MadGraphScripts"
+Scripts=${simulation_dir}/VectorExtraction/MadGraphScripts
 # Extractor is the directory where the python extractor is
-Extractor="../Mu-Simulation/VectorExtraction/run_muon_extract.py"
+Extractor=${simulation_dir}/VectorExtraction/run_muon_extract.py
 # Combiner is the directory where the python extractor is
-Combiner="../Mu-Simulation/VectorExtraction/combine_muon_data.py"
+Combiner=${simulation_dir}/VectorExtraction/combine_muon_data.py
 
 # ---------------------------------------------------------------------------------------
 # TEMPORARY DIRECTORIES FOR MADGRAPH
+if [ -z "$SLURM_TMPDIR" ]; then 
+  echo "No SLURM_TMPDIR, running locally"
+  SLURM_TMPDIR=$PATH_MG5_tmp
+  SLURM_ARRAY_TASK_ID=0
+fi
 #MadGraphScripts is the directory where the created scripts will be stored
 MadGraphScripts="${SLURM_TMPDIR}/MadGraphScripts"
 # DataDir is the directory where the MadGraph folders are created
@@ -31,31 +35,15 @@ MGDataDir="${SLURM_TMPDIR}/MadGraphOutput"
 #HepMCToText is where the text files are stored after being converted from Hepmc,
 #but before being combined into one file.
 HepMCToText="${SLURM_TMPDIR}/HepMCToText"
-
-# ---------------------------------------------------------------------------------------
 # Making MadGraph high I/O directories 
-mkdir "${SLURM_TMPDIR}/MadGraphScripts"
-mkdir "${SLURM_TMPDIR}/MadGraphOutput"
-mkdir "${SLURM_TMPDIR}/HepMCToText"
+mkdir -p $MadGraphScripts
+mkdir -p $MGDataDir
+mkdir -p $HepMCToText
 
-# Set the right version of pythia for madgraph
-echo "Exporting PYTHIA8"
-echo "Running initsim"
-export PYTHIA8=/project/def-mdiamond/tomren/mathusla/pythia8308
-export PYTHIA8DATA="${MG5_Dir}/HEPTools/pythia8/share/Pythia8/xmldoc"
-PATH=$PATH:/project/def-mdiamond/tomren/mathusla/dlib-19.24/install
-module load StdEnv/2020
-module load qt/5.12.8
-module load gcc/9.3.0
-module load root/6.26.06
-module load eigen/3.3.7
-module load geant4/10.7.3
-module load geant4-data/10.7.3
 
 # ---------------------------------------------------------------------------------------
 # Running MadGraph
 # Two identifiers: One is the MG5 set number, the other is the Job number
-NumSets=${3}
 for (( c=0; c<NumSets; c++ )) # Generate NumSets*10000 MadGraph Events
 do
 
@@ -76,7 +64,7 @@ do
 
   # Run the extractor
   echo "Extracting Muons"
-  python3 ${Extractor} "${HepMCDir}/Events/run_01/tag_1_pythia8_events.hepmc" "${HepMCToText}/bkg_muon_${SLURM_ARRAY_TASK_ID}_${c}.txt" ${2}
+  python3 ${Extractor} "${HepMCDir}/Events/run_01/tag_1_pythia8_events.hepmc" "${HepMCToText}/bkg_muon_${SLURM_ARRAY_TASK_ID}_${c}.txt" $pTcut
 
   # Delete the data folder
   echo "Removing data folder"
@@ -93,21 +81,13 @@ do
 done
 
 # ---------------------------------------------------------------------------------------
-# Run the function initsim
-echo "Running initsim"
-export PYTHIA8=/project/def-mdiamond/tomren/mathusla/pythia8308
-export PYTHIA8DATA=$PYTHIA8/share/Pythia8/xmldoc
-PATH=$PATH:/project/def-mdiamond/tomren/mathusla/dlib-19.24/install
-module load StdEnv/2020
-module load qt/5.12.8
-module load gcc/9.3.0
-module load root/6.26.06
-module load eigen/3.3.7
-module load geant4/10.7.3
-module load geant4-data/10.7.3
 # Run Geant4
 echo "Running Geant4"
 echo "simulation directory: ${simulation_dir}"
 pushd ${simulation_dir}
 ./simulation -s ${PATH_MG5_in}/bkg_muon_${SLURM_ARRAY_TASK_ID}.mac -o ${PATH_MG5_out}/bkg_muon_${SLURM_ARRAY_TASK_ID}
 popd
+
+
+# Clean up the text file
+rm -rf $SLURM_TMPDIR

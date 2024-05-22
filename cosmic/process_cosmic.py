@@ -11,7 +11,7 @@ from pylab import *
 # Detector variables
 box_size=[40,40,20]
 t_max = 200*1.5 # np.linalg.norm(box_size)/0.3
-time_window = [-t_max, t_max] #  [ns] Time window needs to cover the time of flight from one corner to another. For 40mx40mx20m, the diagonal is 60m, divided by speed of ligh 0.3m/ns
+
 hit_offset_x = 90
 hit_offset_y = 0
 hit_offset_z = 20
@@ -22,25 +22,29 @@ cosmic_radius = 35 # radius of the target area in m
 hit_plane_x = [hit_offset_x-box_size[0]*0.5, hit_offset_x+box_size[0]*0.5]
 hit_plane_y = [hit_offset_y-box_size[1]*0.5, hit_offset_y+box_size[1]*0.5]
 hit_plane_z = hit_offset_z
-hit_time_offset = np.linalg.norm([decay_volume_middle_height - cms_z, hit_offset_x + box_size[0]*0.5])/0.3 - (cosmic_radius)/0.3
+hit_time_offset_min = np.linalg.norm([hit_offset_x-box_size[0]*0.5, cms_z])/0.3 - cosmic_radius/0.3
+hit_time_offset_max = np.linalg.norm([hit_offset_x+box_size[0]*0.5, cms_z+hit_offset_z, box_size[0]*0.5])/0.3 - cosmic_radius/0.3
+time_window = [hit_time_offset_min - t_max*0.5, hit_time_offset_max+t_max*0.5] #  [ns] Time window needs to cover the time of flight from one corner to another. For 40mx40mx20m, the diagonal is 60m, divided by speed of ligh 0.3m/ns
+print("Cosmic Hit time window", time_window, time_window[1]-time_window[0])
+time_window = [0,600]
+print("Actually, use", time_window, time_window[1]-time_window[0])
+
 
 seed = 1
 rng = np.random.default_rng(seed)
 
 # --------------------------------------------------------------------------------
 # Sim and tracker executable
-simulation='/home/owhgabri/scratch/My_Github/Mu-Simulation/simulation '
-digitizer='/home/owhgabri/scratch/My_Github/Mu-Simulation/digitizer '
-#tracker2="python3 /home/tomren/jupyter/pyTracker/tracker/run.py "
+# simulation='/home/owhgabri/scratch/My_Github/Mu-Simulation/simulation '
+# digitizer='/home/owhgabri/scratch/My_Github/Mu-Simulation/digitizer '
 
 # Handle arguments and parameters
 path = "parma_cpp/GeneOut/"
 if len(sys.argv)>1:
     path = sys.argv[1]
-    
 path = os.path.abspath(path)
-output_name = path + "/cosmic_filereader"
-filenames = glob.glob(path+"/generation*.out")
+
+
 sim_output_path = "cosmic/parma_cpp/GeneOut/"
 if len(sys.argv)>2:
     sim_output_path = sys.argv[2]
@@ -53,6 +57,9 @@ if len(sys.argv)>3:
         run=False
     elif sys.argv[3]=="Run":
         run=True
+        
+output_name = path + "/cosmic_filereader"
+filenames = glob.glob(path+"/generation*.out")        
 
 # --------------------------------------------------------------------------------
 
@@ -203,7 +210,7 @@ for i in range(len(filenames)):
         data_combined["py"].append(py)
         data_combined["pz"].append(-pz)
 
-        data_combined["t"].append(rng.uniform(time_window[0]+hit_time_offset, time_window[1]+hit_time_offset))
+        data_combined["t"].append(rng.uniform(time_window[0], time_window[1]))
         data_combined["pid"].append(pid)
     
 print("Total events", total_events)
@@ -226,11 +233,20 @@ sim_script_filename = generate_sim_script_filereader(filename_filereader)
 
 # --------------------------------------------------------------------------------
 # Make a bash script to call Geant and submit jobs
-run_script = f"{simulation} -q  -o {sim_output_path}  -s {sim_script_filename} "
+run_script = f"""
+pushd ${{simulation_dir}}
+./simulation -q  -o {sim_output_path}  -s {sim_script_filename} 
+popd
+"""
+
 job_script=f"""
-export PYTHIA8=/project/def-mdiamond/tomren/mathusla/pythia8308
-export PYTHIA8DATA=$PYTHIA8/share/Pythia8/xmldoc
-PATH=$PATH:/project/def-mdiamond/tomren/mathusla/dlib-19.24/install
+PATH_DATA="/project/rrg-mdiamond/data/MATHUSLA"
+
+export MG5_Dir=${{PATH_DATA}}/bin/MG5_aMC_v3_5_4
+export MG5_bin=${{MG5_Dir}}/bin/mg5_aMC
+export PYTHIA8=${{MG5_Dir}}/HEPTools/pythia8
+export PYTHIA8DATA=${{MG5_Dir}}/HEPTools/pythia8/share/Pythia8/xmldoc
+PATH=$PATH:${{PATH_DATA}}/bin/dlib-19.24/install
 module load StdEnv/2020 gcc/9.3.0 qt/5.12.8 root/6.26.06  eigen/3.3.7 geant4/10.7.3 geant4-data/10.7.3
 
 {run_script}

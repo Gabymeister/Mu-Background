@@ -28,7 +28,7 @@ This repository implements helper scripts to run the entire workflow for backgro
 
 ## 1.2 Steps
 
-First, make a directory and clone this repository. Then source the initialization script. 
+First, make a directory and clone this repository. Then source the initialization script `init.sh`.  
 This script will setup the environment, compile the `Geant4 simulation` and `Digiziter` code if the executable is not presented.
 
 Second, run the script `run_all_bkg.sh` that implement the entire workflow described above.
@@ -37,7 +37,6 @@ Second, run the script `run_all_bkg.sh` that implement the entire workflow descr
 mkdir background_gen; cd !$
 git clone https://github.com/EdmondRen/Mu-Background.git; cd Mu-Background
 
-
 source init.sh
 ./run_all_bkg.sh
 ```
@@ -45,39 +44,46 @@ source init.sh
 # 2. Details about the background study
 ## 2.1 Collider background
 
-### Setting Up MadGraph and Pythia8 ###
+### Setting Up MadGraph and Pythia8
 
 This version of the code uses MadGraph v3.5.1. MadGraph is a self-contained framework for simulating SM and BSM phenomenology, computing cross-sections, and generating hard-events. Pythia8 may also be installed in MadGraph, which simulates multi-state parton showers.
 
 Reference:
 
-    J. Alwall et al, "The automated computation of tree-level and next-to-leading order differential cross sections, and their matching to parton shower simulations"
-
+    J. Alwall et al, "The automated computation of tree-level and next-to-leading order differential cross sections, and their matching to parton shower simulations"   
     Bierlich, Christian, et al. "A comprehensive guide to the physics and usage of PYTHIA 8.3." SciPost Physics Codebases (2022): 008.
 
-Usage: 
-Madgraph may be downloaded from this link: http://launchpad.net/madgraph5/3.0/3.5.x/+download/MG5_aMC_v3.5.4.tar.gz
+Install:  
 
-Unzip it:
+```bash
+# # Install Pythia
+# wget https://pythia.org/download/pythia83/pythia8306.tar
+# tar -xf pythia8306.tar; rm pythia8306.tar; cd pythia8306
+# ./configure
+# make -j8
+# cd ..
 
-    gzip -d MG5_aMC_v3.5.4.tar.gz
+# Install Madgraph
+module load StdEnv/2020 gcc/9.3.0 qt/5.12.8 root/6.26.06  eigen/3.3.7 geant4/10.7.3 geant4-data/10.7.3
+mg5_version="MG5_aMC_v3_5_4"
+mg5_version_download="MG5_aMC_v3.5.4"
+wget http://launchpad.net/madgraph5/3.0/3.5.x/+download/${mg5_version_download}.tar.gz
+tar -xzf ${mg5_version_download}.tar.gz
+\rm ${mg5_version_download}.tar.gz
+realpath ${mg5_version} # Print the full path of the installed Madgraph
+cd $mg5_version
+./bin/mg5_aMC
+install pythia
+exit 
 
-Then you can run it using the command
+```
 
-    ./MG5_aMC_v3_5_4/bin/mg5_aMC
+You need to export the PYTHIA path if you need to run PYTHIA outside MadGraph:
+```bash
+export PYTHIA8=/project/6049244/data/MATHUSLA/bin/MG5_aMC_v3_5_4/HEPTools/pythia8
+export PYTHIA8DATA=${PYTHIA8}/share/Pythia8/xmldoc
+```
 
-This should provide an interactive session. The first time this is done, run the command
-
-    install pythia8
-
-Then type "exit." This will permanently install pythia8 into the self-contained MadGraph framework.
-
-It is recommended before running the program to set the appropriate paths, as certain cross-sections may conflict between your default pythia version and MadGraph's version. One should set the following path before running MadGraph with Pythia8:
-
-    export PYTHIA8=/project/def-mdiamond/tomren/mathusla/pythia8308
-    export PYTHIA8DATA="MG5_DIR/HEPTools/pythia8/share/Pythia8/xmldoc"
-
-where `MG5_DIR` is the MadGraph Directory (so from before, `MG5_DIR=MG5_aMC_v3_5_4`)
 
 ### Script for Running MadGraph ###
 
@@ -147,16 +153,16 @@ The bash script calls a python script `process_cosmic.py` that further process t
 * The flux of each particle is collected
 * The kinetic energy is converted to momentum in MeV/c
 * The xyz value is added with an offset. The offset makes the Sphere to be center around the detector
-* The time of the event is randomly sampled within a time window (+/- 300 ns). **Note that this is not very accurate.** 
+* The time of the event is randomly sampled within a time window 0-600 ns. **Note that this is not very accurate.** 
 
 The total flux of all the simulated particle is 0.047587973 /cm2/s. 
 For normalization, the simulation results should be multiplied with the total flux (/cm2/s) and pi*radi*radi.
 In our case, radi=35m, the event rate is 3.1415926*3500*3500 * 0.047587973 = 1831399 Hz 
 
 Since the radius is larger than the actual detector, part of the simulation leaves no hits in the detector. A quick check shows that each recorded event corresponds to a flux of  0.01245836832471164 /cm2/s.
-If we assume a coincidence window of +/- 300 ns (200 ns is the time for light to go from one corner of the decay volume to the other, a factor of 1.5 is multiplied), then the 
+If we assume a coincidence window of 600 ns (200 ns is the time for light to go from one corner of the decay volume to the other, CMS->closest corner is 367 ns, to the furthest corner is 420ns), then the 
 
-    average number of cosmic ray per event is 0.2876725153668654
+    average number of cosmic ray per event is 479454Hz * 600ns =  0.2876
 
 This number is important when combining the cosmic ray simulation with the collider muon simulation. For each of the collider muon event, there should be  0.28767251536 cosmic ray events added on average within +/-300 ns time windows.
 
