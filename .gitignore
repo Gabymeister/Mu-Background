@@ -13,8 +13,11 @@ plots/
 *$.core
 **/[Cc]ore*
 
-# scripts/data
-# scripts/proc*
+# Madgraph
 scripts/madgraph/ME5_debug
-scripts/madgraph/proc_sm_muprod_wz_nomatch/Events/*
-scripts/madgraph/proc_sm_muprod_wz_matched/Events/*
+scripts/madgraph/py.py
+scripts/madgraph/proc_sm_muprod_wz_nomatch
+scripts/madgraph/proc_sm_muprod_wz_matched
+py.py
+
+*slurm-*.out

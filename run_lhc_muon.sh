@@ -1,3 +1,10 @@
+#!/bin/bash
+#SBATCH --time=1:00:00
+#SBATCH --account=def-mdiamond
+#SBATCH --array=1-2
+#SBATCH --mem=2G
+
+
 # ${1} is the minimum pT cutoff you want to apply (in MeV) (normally 20k)
 # ${2} is the number of MG5 events to run*10 thousand (i.e. 5 -> 50000 events)
 
@@ -15,11 +22,11 @@ NumSets=${2}
 # ---------------------------------------------------------------------------------------
 # PATHS TO EXECUTABLES
 # Scripts is the directory where the Base MadGraph Script is
-Scripts=${simulation_dir}/VectorExtraction/MadGraphScripts
+Scripts=scripts/madgraph
 # Extractor is the directory where the python extractor is
-Extractor=${simulation_dir}/VectorExtraction/run_muon_extract.py
+Extractor=scripts/VectorExtraction/run_muon_extract.py
 # Combiner is the directory where the python extractor is
-Combiner=${simulation_dir}/VectorExtraction/combine_muon_data.py
+Combiner=scripts/VectorExtraction/combine_muon_data.py
 
 # ---------------------------------------------------------------------------------------
 # TEMPORARY DIRECTORIES FOR MADGRAPH
@@ -50,7 +57,7 @@ do
   # Create the MadGraph Scripts for each set of each job
   echo "Creating MadGraph Scripts"
   seedval=$((c + NumSets * SLURM_ARRAY_TASK_ID))
-  cp "${Scripts}/sm_muprod_wz.txt" "${MadGraphScripts}/sm_muprod_wz_${SLURM_ARRAY_TASK_ID}_${c}.txt"
+  cp "${Scripts}/card_wz_matched.dat" "${MadGraphScripts}/sm_muprod_wz_${SLURM_ARRAY_TASK_ID}_${c}.txt"
   sed -i "14s/.*/set iseed = ${seedval}/" "${MadGraphScripts}/sm_muprod_wz_${SLURM_ARRAY_TASK_ID}_${c}.txt"
   sed -i "5s|.*|output ${MGDataDir}/proc_sm_muprod_wz_matched_${SLURM_ARRAY_TASK_ID}_${c}|" "${MadGraphScripts}/sm_muprod_wz_${SLURM_ARRAY_TASK_ID}_${c}.txt"
   sed -i "6s|.*|launch ${MGDataDir}/proc_sm_muprod_wz_matched_${SLURM_ARRAY_TASK_ID}_${c}|" "${MadGraphScripts}/sm_muprod_wz_${SLURM_ARRAY_TASK_ID}_${c}.txt"
