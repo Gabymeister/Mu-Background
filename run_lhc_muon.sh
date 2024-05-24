@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --time=1:00:00
-#SBATCH --account=def-mdiamond
-#SBATCH --array=1-2
+#SBATCH --account=rrg-mdiamond
+#SBATCH --array=1-1
 #SBATCH --mem=2G
 
 
@@ -67,7 +67,8 @@ do
   ${MG5_Dir}/bin/mg5_aMC "${MadGraphScripts}/sm_muprod_wz_${SLURM_ARRAY_TASK_ID}_${c}.txt"
   HepMCDir="${MGDataDir}/proc_sm_muprod_wz_matched_${SLURM_ARRAY_TASK_ID}_${c}"
   # Unzip the data
-  gzip -d "${HepMCDir}/Events/run_01/tag_1_pythia8_events.hepmc.gz"
+  # No longer need to Unzip, change "set pythia8_card HEPMCoutput:file hepmc" in madgraph
+  # gzip -d "${HepMCDir}/Events/run_01/tag_1_pythia8_events.hepmc.gz"
 
   # Run the extractor
   echo "Extracting Muons"

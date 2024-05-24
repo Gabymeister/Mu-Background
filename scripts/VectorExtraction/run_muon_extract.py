@@ -42,7 +42,7 @@ nevents = 0
 for entry in particles:
     if entry[0] == "n":
         nevents += 1
-        line = entry[0] + " " + str(entry[1])
+        line = entry[0] + " " + str(entry[1]) + " 0 .0 .0 .0 .0 .0 .0 "
     else:
         line = "\t" + str(entry[0]) + "\t" + str(entry[1]) + "\t" + str(entry[2]) + "\t" + str(entry[3]) + "\t" + str(entry[4]) + "\t" + str(entry[5]) + "\t" + str(entry[6])
     data.write(line)

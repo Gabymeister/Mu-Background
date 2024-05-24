@@ -1,3 +1,9 @@
+
+This folder contains madgraph scripts for generating LHC backgrounds.
+
+Card `card_wz_matched.dat` 
+
+```
 define lepall= mu+ mu-
 define vorlepall = vl vl~ lepall
 generate p p > lepall vorlepall @0
@@ -15,3 +21,4 @@ set iseed = 1
 set use_syst = False
 set pythia8_card HEPMCoutput:file hepmc
 done
+```

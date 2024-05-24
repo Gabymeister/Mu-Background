@@ -12,4 +12,5 @@ set etal  = 2.0
 set drll  = 0
 set iseed = 1
 set use_syst = False
+set pythia8_card HEPMCoutput:file hepmc
 done

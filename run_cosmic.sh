@@ -89,7 +89,7 @@ popd
 
 
 # --------------------------------------------------------------------
-# Run digitizer
+# Run digitizer and tracker
 if [ ! -z "${DIGITIZE}" ]; then
     echo "Running digitizer on cosmic sim result..."
 
@@ -98,7 +98,10 @@ if [ ! -z "${DIGITIZE}" ]; then
     find $PATH_COSMIC_out/run_$RUN -type f -name "run0.root" | while read -r file; do
         echo "processing file ${file}"
         mkdir -p ${PATH_Digi_out}/cosmic_run_$RUN/$i
+        # digitizer
         ./digitizer -l $file  -o ${PATH_Digi_out}/cosmic_run_$RUN/$i
+        # tracker
+        pytracker ${PATH_Digi_out}/cosmic_run_$RUN/$i/stat0.root ${PATH_Digi_out}/cosmic_run_$RUN/$i  --config $PATH_REPO/par_cards/tracker_config.py --overwrite
         ((i+=1))
     done    
     popd

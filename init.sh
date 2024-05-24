@@ -22,7 +22,7 @@ RUN_NAME="run-2024-05-cosmic-setup" # RUN Name. ALWAYS START WITH 'run-YYYY-MM-'
 # 		|--SimOutput
 # 		|	|-- cosmic
 # 		|	`-- MG5
-# 		|--DigiOutput
+# 		|--DigiOutput // The Tracker result is saved in the same directory
 # 		|	`-- ....  
 # 		`--config
 #------------------------------------------------------------
@@ -30,8 +30,10 @@ RUN_NAME="run-2024-05-cosmic-setup" # RUN Name. ALWAYS START WITH 'run-YYYY-MM-'
 
 PATH_DATA=${PATH_MATHUSLA}/simulation/$RUN_NAME
 PATH_DATA_config=${PATH_MATHUSLA}/simulation/$RUN_NAME/config
+PATH_REPO=`realpath .`
 export PATH_DATA=$PATH_DATA
 export PATH_DATA_config=$PATH_DATA_config
+export PATH_REPO=$PATH_REPO
 mkdir -p $PATH_DATA
 mkdir -p $PATH_DATA_config
 

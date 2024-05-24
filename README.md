@@ -43,12 +43,18 @@ source init.sh
 
 ## 1.3 \[IMPORTANT\] check these numbers if the simulation configuration changed
 
-1. Cosmic (PARMA):
+1. **Cosmic** (PARMA):
     1. The sphere radius used in PARMA. This number is the `radi` variable in cosmic/parma_cpp/main-generator-mathusla.cpp
-    2. The cosmic ray flux, and other behaviour: use the jupyter notebook `cosmic/cosmic_check.ipynb` to check. Follow the instruction in the notebook.
-2. Geant4
-3. Digitizer
-4. Reconstruction
+    2. The cosmic ray flux. This is important because it will affect how many cosmic ray events should be added to the LHC background. use the jupyter notebook `cosmic/cosmic_check.ipynb` to check. Follow the instruction in the notebook.
+    3. other random things, see the beginning of the source code cosmic/parma_cpp/main-generator-mathusla.cpp
+2. **Geant4**
+3. **Digitizer**: par_cards/digitizer_par_card.txt
+    1. Noise rate:
+    2. Noise time window-- NOT IMPLEMENTED YET
+    3. Cosmic rate:
+    4. Scint efficiency:
+4. **Reconstruction**: par_cards/tracker_config.py
+    1. 
 
 # 2. Details about the background study
 ## 2.1 Collider background

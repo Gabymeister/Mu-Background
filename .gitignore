@@ -20,4 +20,4 @@ scripts/madgraph/proc_sm_muprod_wz_nomatch
 scripts/madgraph/proc_sm_muprod_wz_matched
 py.py
 
-*slurm-*.out
+slurm*.out

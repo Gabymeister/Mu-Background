@@ -44,7 +44,7 @@ for i in range(int(sys.argv[3])):
         if 'n' in line:
             eventNum = int(re.findall(r'\d+', line)[0])
             # Combining files, so add based on total so far
-            line = "n " + str(eventNum + TotalEvents) + '\n'
+            line = "n " + str(eventNum + TotalEvents) + " 0 .0 .0 .0 .0 .0 .0  \n"
         else:
             data = line.split()
             phi = math.atan(float(data[5])/float(data[4]))
