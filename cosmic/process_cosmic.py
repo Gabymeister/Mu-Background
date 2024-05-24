@@ -195,7 +195,7 @@ for i in range(len(filenames)):
     print(f"  events selected: {nevents}/{len(data)}")
     mass = particle_mass[abs(pid)]
     for i in range(nevents):
-        energy, u, v, w, x, y, z = data[i][:]
+        energy, u, v, w, x, y, z = data[i][:] 
         momentum = np.sqrt(energy**2 + 2*energy*mass)
         px, py, pz =  momentum* np.array([u,v,w]) #np.sqrt(energy**2-mass**2)
         # x, y, z = rng.uniform(*hit_plane_x), rng.uniform(*hit_plane_y), hit_plane_z
@@ -203,9 +203,9 @@ for i in range(len(filenames)):
         # data_combined["y"].append(y*1000)
         # data_combined["z"].append(-z*1000) 
         
-        data_combined["x"].append((x+hit_offset_x)*1000)
-        data_combined["y"].append((y+hit_offset_y)*1000)
-        data_combined["z"].append(-z*1000)        
+        data_combined["x"].append((x/100+hit_offset_x)*1000)
+        data_combined["y"].append((y/100+hit_offset_y)*1000)
+        data_combined["z"].append(-z*10)        
         data_combined["px"].append(px)
         data_combined["py"].append(py)
         data_combined["pz"].append(-pz)
@@ -240,15 +240,6 @@ popd
 """
 
 job_script=f"""
-PATH_DATA="/project/rrg-mdiamond/data/MATHUSLA"
-
-export MG5_Dir=${{PATH_DATA}}/bin/MG5_aMC_v3_5_4
-export MG5_bin=${{MG5_Dir}}/bin/mg5_aMC
-export PYTHIA8=${{MG5_Dir}}/HEPTools/pythia8
-export PYTHIA8DATA=${{MG5_Dir}}/HEPTools/pythia8/share/Pythia8/xmldoc
-PATH=$PATH:${{PATH_DATA}}/bin/dlib-19.24/install
-module load StdEnv/2020 gcc/9.3.0 qt/5.12.8 root/6.26.06  eigen/3.3.7 geant4/10.7.3 geant4-data/10.7.3
-
 {run_script}
 
 echo "Run finished, cleaning input files"

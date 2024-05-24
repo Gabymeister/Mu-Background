@@ -25,7 +25,7 @@ Combiner=${simulation_dir}/VectorExtraction/combine_muon_data.py
 # TEMPORARY DIRECTORIES FOR MADGRAPH
 if [ -z "$SLURM_TMPDIR" ]; then 
   echo "No SLURM_TMPDIR, running locally"
-  SLURM_TMPDIR=$PATH_MG5_tmp
+  SLURM_TMPDIR=$PATH_MG5_in
   SLURM_ARRAY_TASK_ID=0
 fi
 #MadGraphScripts is the directory where the created scripts will be stored

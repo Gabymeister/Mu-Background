@@ -13,5 +13,8 @@ plots/
 *$.core
 **/[Cc]ore*
 
-scripts/data
-scripts/proc*
+# scripts/data
+# scripts/proc*
+scripts/madgraph/ME5_debug
+scripts/madgraph/proc_sm_muprod_wz_nomatch/Events/*
+scripts/madgraph/proc_sm_muprod_wz_matched/Events/*

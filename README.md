@@ -41,6 +41,15 @@ source init.sh
 ./run_all_bkg.sh
 ```
 
+## 1.3 \[IMPORTANT\] check these numbers if the simulation configuration changed
+
+1. Cosmic (PARMA):
+    1. The sphere radius used in PARMA. This number is the `radi` variable in cosmic/parma_cpp/main-generator-mathusla.cpp
+    2. The cosmic ray flux, and other behaviour: use the jupyter notebook `cosmic/cosmic_check.ipynb` to check. Follow the instruction in the notebook.
+2. Geant4
+3. Digitizer
+4. Reconstruction
+
 # 2. Details about the background study
 ## 2.1 Collider background
 

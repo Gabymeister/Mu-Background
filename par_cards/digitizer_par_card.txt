@@ -1,0 +1,17 @@
+branch 0.0
+debug 0.0
+debug_vertex 0.0
+seed 1.0
+p 500.0
+
+# Scintillator inefficiency for wall/floor (probability of dropping a hit)
+scint_efficiency 0.001
+
+# Run parameters
+# - start_ev: start event index
+# - end_ev: end event index (not included)
+# - cosmic_rate: average number of cosmic events per lhc event
+start_ev 0.0
+end_ev 100000.0
+noise_hz 0.0
+cosmic_rate 0.0

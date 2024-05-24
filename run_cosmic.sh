@@ -8,9 +8,17 @@ SUBMIT="False" # {True, False, Run}
 PARTICLES=(0 1 29 30 31 32 33)
 PARTICLES_USER=
 OVERWRITE=
+DIGITIZE=
+CLEAN_OUTPUT=
 
-usage() { echo "Usage: $0 [-n NUMBER_OF_EVENTS] [-r RUN_NUMBER] [-s SUBMIT_JOB {True, False, Run}] [-p PARTICLE]" 1>&2; echo "Particle ID (Particle ID, 0:neutron, 1-28:H-Ni, 29-30:muon+-, 31:e-, 32:e+, 33:photon)"; exit 1; }
-while getopts n:r:s:p:hf flag
+usage() { 
+    echo "Usage: $0 [-n NUMBER_OF_EVENTS] [-r RUN_NUMBER] [-s SUBMIT_JOB {True, False, Run}] [-p PARTICLE] [-h] [-f] [-d] [-c]" 1>&2; 
+    echo "Particle ID (Particle ID, 0:neutron, 1-28:H-Ni, 29-30:muon+-, 31:e-, 32:e+, 33:photon)"; 
+    echo " [-f] force to overwrite existing output directory";
+    echo " [-d] run digitizer"
+    echo " [-c] cleans the output directory"
+    exit 1; }
+while getopts n:r:s:p:hfdc flag
 do
     case "${flag}" in
         n) NEVENTS=${OPTARG};;
@@ -18,22 +26,34 @@ do
         s) SUBMIT=${OPTARG};;
         p) PARTICLES_USER=${OPTARG};;
         f) OVERWRITE=1;;
+        d) DIGITIZE=1;;
+        c) CLEAN_OUTPUT=1;;
         h) usage;;
     esac
 done
 
+# --------------------------------------------------------------------
+# Run the cosmic sim (PARMA + G4)
+# temporarily go into cosmic/parcpp folder
 pushd cosmic/parma_cpp
-
-# Check if directory exists
+# Check if PARMA output directory exists
 if ([ -d "GeneOut/run_${RUN}" ] && [ -z "${OVERWRITE}" ]); then
-    echo "Directory exists! Use -f option to overwrite. Exiting..."
+    echo " [Error] Directory exists! Use -f option to overwrite. Exiting..."
     exit 1
 elif [ ! -z "${OVERWRITE}" ]; then
-    echo $OVERWRITE
     echo "Directory exists! Deleting existing file..."
     \rm GeneOut/run_$RUN/* -rf
 fi
 mkdir -p GeneOut/run_$RUN
+
+
+# Check if GEANT4 output directory exists
+if ([ -d "$PATH_COSMIC_out/run_$RUN" ] && [ -z "${CLEAN_OUTPUT}" ]); then
+    echo " [Warning] Geant4 output directory exists! Use -c option to delet existing files"
+elif [ ! -z "${CLEAN_OUTPUT}" ]; then
+    echo " Geant4 output directory exists! Deleting existing file..."
+    \rm $PATH_COSMIC_out/run_$RUN/* -rf
+fi
 
 
 if [ -z "${PARTICLES_USER}" ]; then
@@ -59,11 +79,31 @@ else
 fi
 
 
-
 cd ..
 echo  $PATH_COSMIC_out
 mkdir -p $PATH_COSMIC_out/run_$RUN
 python process_cosmic.py `realpath parma_cpp/GeneOut/run_$RUN/` $PATH_COSMIC_out/run_$RUN   $SUBMIT
 
-
 popd
+
+
+
+# --------------------------------------------------------------------
+# Run digitizer
+if [ ! -z "${DIGITIZE}" ]; then
+    echo "Running digitizer on cosmic sim result..."
+
+    pushd ${digitizer_dir}
+    i=0
+    find $PATH_COSMIC_out/run_$RUN -type f -name "run0.root" | while read -r file; do
+        echo "processing file ${file}"
+        mkdir -p ${PATH_Digi_out}/cosmic_run_$RUN/$i
+        ./digitizer -l $file  -o ${PATH_Digi_out}/cosmic_run_$RUN/$i
+        ((i+=1))
+    done    
+    popd
+
+fi
+
+
+

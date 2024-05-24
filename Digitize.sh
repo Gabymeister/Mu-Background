@@ -3,7 +3,7 @@
 #SBATCH --account=def-mdiamond
 #SBATCH --mem=2G
 
-# ${1} 
+
 
 # ------------------------------------------------------------------------------------------------
 # Cosmic variables
@@ -45,7 +45,7 @@ echo "sourcing init.sh"
 source init.sh
 
 # Change par_card.txt of digitizer to this one
-cp par_cards/par_card.txt ${digitizer_dir}/Digitizer/run/
+cp par_cards/digitizer_par_card.txt ${digitizer_dir}/Digitizer/run/
 
 # ------------------------------------------------------------------------------------------------
 # Running digitizer
