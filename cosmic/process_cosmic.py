@@ -6,6 +6,9 @@ import glob
 
 from pylab import *
 
+import functools
+print = functools.partial(print, flush=True)
+
 
 # --------------------------------------------------------------------------------
 # Detector variables

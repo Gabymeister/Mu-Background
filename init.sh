@@ -1,7 +1,7 @@
 #------------------------------------------------------------
 # CHANGE THE RUN NAME
 PATH_MATHUSLA="/project/rrg-mdiamond/data/MATHUSLA/"
-RUN_NAME="run-2024-05-cosmic-setup" # RUN Name. ALWAYS START WITH 'run-YYYY-MM-'
+RUN_NAME="run-2024-06-cosmic-muon" # RUN Name. ALWAYS START WITH 'run-YYYY-MM-'
 
 # * PATH_MATHUSLA sets the path to the MATHUSLA folder
 # * RUN_NAME sets the run name
@@ -30,12 +30,24 @@ RUN_NAME="run-2024-05-cosmic-setup" # RUN Name. ALWAYS START WITH 'run-YYYY-MM-'
 
 PATH_DATA=${PATH_MATHUSLA}/simulation/$RUN_NAME
 PATH_DATA_config=${PATH_MATHUSLA}/simulation/$RUN_NAME/config
+PATH_DATA_log=${PATH_MATHUSLA}/simulation/$RUN_NAME/log
 PATH_REPO=`realpath .`
 export PATH_DATA=$PATH_DATA
 export PATH_DATA_config=$PATH_DATA_config
 export PATH_REPO=$PATH_REPO
 mkdir -p $PATH_DATA
 mkdir -p $PATH_DATA_config
+mkdir -p $PATH_DATA_log
+ln -sfn $PATH_DATA_log scripts/slurm_log
+
+# Check if PARMA output directory exists
+if ([ -d "${PATH_DATA}" ]); then
+    echo ""
+	echo "[WARNING] data directory already exists: ${PATH_DATA}"
+    echo "          Please check this is where you'd like to save all simulation results."
+    echo ""
+
+fi
 
 
 
@@ -120,9 +132,12 @@ export PATH_Digi_out=$PATH_Digi_out
 
 
 
+echo ""
+echo "-------------------------------------------"
 echo "Environment setup finished"
 echo ""
 echo "Run: ${RUN_NAME}"
 echo "Results saved in ${PATH_DATA}" 
+echo "-------------------------------------------"
 
 

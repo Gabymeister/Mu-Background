@@ -58,14 +58,16 @@ int main(int argc, char **argv)
     //---------------------------------------------------
     // Handel the input arguments
     int opt;
-    while ((opt = getopt (argc, argv, "p:n:")) != -1)
+    string outdir="GeneOut";
+    while ((opt = getopt (argc, argv, "p:n:d:")) != -1)
         switch (opt)
           {
           case 'p':
-            // cout<<optarg<<endl;
             ip = atoi(optarg);
           case 'n':
             nevent = atoi(optarg);
+          case 'd':
+            outdir = optarg;
           default:
             break;
       }
@@ -167,7 +169,7 @@ int main(int argc, char **argv)
     mt19937 engine(rd());                                     // Mersenne Twister
     uniform_real_distribution<double> rand01(0.0, 1.0); // random number between 0 to 1
 
-    ofstream sf("GeneOut/generation.out", ios::out);
+    ofstream sf(outdir+"/generation.out", ios::out);
     sf << "ip= " << ip << " ,W-index= " << s << " ,Rc(GV)= " << r << " ,depth(g/cm2)= " << d << " ,g= " << g << "\n";
     sf << "Total Flux (/cm2/s)= " << TotalFlux << "\n";
     sf << "  Energy(MeV/n)              u              v              w              x              y              z\n";

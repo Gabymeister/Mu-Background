@@ -93,7 +93,7 @@ done
 echo "Running Geant4"
 echo "simulation directory: ${simulation_dir}"
 pushd ${simulation_dir}
-./simulation -s ${PATH_MG5_in}/bkg_muon_${SLURM_ARRAY_TASK_ID}.mac -o ${PATH_MG5_out}/bkg_muon_${SLURM_ARRAY_TASK_ID}
+./simulation -q -s ${PATH_MG5_in}/bkg_muon_${SLURM_ARRAY_TASK_ID}.mac -o ${PATH_MG5_out}/bkg_muon_${SLURM_ARRAY_TASK_ID}
 popd
 
 

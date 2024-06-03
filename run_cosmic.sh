@@ -1,5 +1,5 @@
 # Usage
-# ./run_cosmic.sh [-n NUMBER_OF_EVENTS (default is 10000)] [-r RUN_NUMBER (default is 1)] [-s SUBMIT_JOB ({True, False, Run}, defulat is False)] [-p PARTICLE]
+# ./run_cosmic.sh [-n NUMBER_OF_EVENTS (default is 10000)] [-r RUN_NUMBER (default is 1)] [-s SUBMIT_JOB ({True, False, Run}, defulat is False)] [-p PARTICLE] [-d] [-c]
 # Particle ID (Particle ID, 0:neutron, 1-28:H-Ni, 29-30:muon+-, 31:e-, 32:e+, 33:photon)
 
 NEVENTS=10000
@@ -35,16 +35,21 @@ done
 # --------------------------------------------------------------------
 # Run the cosmic sim (PARMA + G4)
 # temporarily go into cosmic/parcpp folder
+echo "-------------------------------------------"
+echo "Cosmic ray simulation"
+echo "-------------------------------------------"
+
 pushd cosmic/parma_cpp
 # Check if PARMA output directory exists
-if ([ -d "GeneOut/run_${RUN}" ] && [ -z "${OVERWRITE}" ]); then
+if ([ -d "${PATH_COSMIC_in}/run_${RUN}" ] && [ -z "${OVERWRITE}" ]); then
     echo " [Error] Directory exists! Use -f option to overwrite. Exiting..."
     exit 1
 elif [ ! -z "${OVERWRITE}" ]; then
     echo "Directory exists! Deleting existing file..."
-    \rm GeneOut/run_$RUN/* -rf
+    \rm ${PATH_COSMIC_in}/run_$RUN/* -rf
 fi
-mkdir -p GeneOut/run_$RUN
+mkdir -p ${PATH_COSMIC_in}/run_$RUN
+parma_run_path=${PATH_COSMIC_in}/run_$RUN
 
 
 # Check if GEANT4 output directory exists
@@ -58,31 +63,31 @@ fi
 
 if [ -z "${PARTICLES_USER}" ]; then
     echo "Generating all particle: n, p, mu-, mu+, e-, e+"
-    ./cosmic_gen -p 0 -n $NEVENTS
-    \mv GeneOut/generation.out GeneOut/run_$RUN/generation_neutron.out
-    ./cosmic_gen -p 1 -n $NEVENTS
-    \mv GeneOut/generation.out GeneOut/run_$RUN/generation_proton.out
-    ./cosmic_gen -p 29 -n $NEVENTS
-    \mv GeneOut/generation.out GeneOut/run_$RUN/generation_muonbar.out
-    ./cosmic_gen -p 30 -n $NEVENTS
-    \mv GeneOut/generation.out GeneOut/run_$RUN/generation_muon.out
-    ./cosmic_gen -p 31 -n $NEVENTS
-    \mv GeneOut/generation.out GeneOut/run_$RUN/generation_electron.out
-    ./cosmic_gen -p 32 -n $NEVENTS
-    \mv GeneOut/generation.out GeneOut/run_$RUN/generation_electronbar.out
-    ./cosmic_gen -p 33 -n $NEVENTS
-    \mv GeneOut/generation.out GeneOut/run_$RUN/generation_photon.out
+    ./cosmic_gen -p 0 -n $NEVENTS -d ${parma_run_path}
+    \mv ${parma_run_path}/generation.out ${parma_run_path}/generation_neutron.out
+    ./cosmic_gen -p 1 -n $NEVENTS -d ${parma_run_path}
+    \mv ${parma_run_path}/generation.out ${parma_run_path}/generation_proton.out
+    ./cosmic_gen -p 29 -n $NEVENTS -d ${parma_run_path}
+    \mv ${parma_run_path}/generation.out ${parma_run_path}/generation_muonbar.out
+    ./cosmic_gen -p 30 -n $NEVENTS -d ${parma_run_path}
+    \mv ${parma_run_path}/generation.out ${parma_run_path}/generation_muon.out
+    ./cosmic_gen -p 31 -n $NEVENTS -d ${parma_run_path}
+    \mv ${parma_run_path}/generation.out ${parma_run_path}/generation_electron.out
+    ./cosmic_gen -p 32 -n $NEVENTS -d ${parma_run_path}
+    \mv ${parma_run_path}/generation.out ${parma_run_path}/generation_electronbar.out
+    ./cosmic_gen -p 33 -n $NEVENTS -d ${parma_run_path}
+    \mv ${parma_run_path}/generation.out ${parma_run_path}/generation_photon.out
 else
     echo "Only generating PID - $PARTICLES_USER"
-    ./cosmic_gen -p $PARTICLES_USER -n $NEVENTS
-    \mv GeneOut/generation.out GeneOut/run_$RUN/generation_pid_$PARTICLES_USER.out
+    ./cosmic_gen -p $PARTICLES_USER -n $NEVENTS -d ${parma_run_path}
+    \mv ${parma_run_path}/generation.out ${parma_run_path}/generation_pid_$PARTICLES_USER.out
 fi
 
 
 cd ..
 echo  $PATH_COSMIC_out
 mkdir -p $PATH_COSMIC_out/run_$RUN
-python process_cosmic.py `realpath parma_cpp/GeneOut/run_$RUN/` $PATH_COSMIC_out/run_$RUN   $SUBMIT
+python process_cosmic.py `realpath ${parma_run_path}` $PATH_COSMIC_out/run_$RUN   $SUBMIT
 
 popd
 

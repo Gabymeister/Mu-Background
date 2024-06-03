@@ -3,6 +3,8 @@
 #SBATCH --account=def-mdiamond
 #SBATCH --array=1-50
 #SBATCH --mem=2G
+#SBATCH --job-name=mu-fullsim
+#SBATCH --output=scripts/slurm_log/log-mu-fullsim_%a.out
 
 source init.sh
 
