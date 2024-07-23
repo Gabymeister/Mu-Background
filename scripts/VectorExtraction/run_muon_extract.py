@@ -1,14 +1,29 @@
 import sys
 import math
-# This program takes three arguments. The first is the hepmc file. The second is the parsed data file output. The third is the minimum pT in GeV
+import os
+# This program takes three arguments. 
+# The first is the hepmc file. 
+# The second is the parsed data file output.
 
-def parse_hepmc(filename):
+
+def getRanges():
+    ranges = {}
+    with open(os.path.abspath(os.path.dirname(__file__)) + "/ranges.txt") as f:
+        while True:
+            line = f.readline()
+            if not line:
+                break
+            line = line.split(" ")
+            ranges[line[0]] = float(line[1])
+    return ranges
+
+
+def parse_hepmc(filename, ranges):
     particles = []
     i = 1
     firstParticle = True
     with open(filename) as f:
         while True:
-        # for i in tqdm(range(100_00)):
             line = f.readline()
             if not line:
                 break
@@ -26,7 +41,12 @@ def parse_hepmc(filename):
             if (line[0]=="P") and (line[8]=="1") and ((line[2]=="13") or (line[2]=="-13")):
                     # Setting this to Geant4 coordinates and units to MeV/c
                     momentum = [1000*float(line[5]), 1000*float(line[3]), -1000*float(line[4])]
-                    if math.sqrt(momentum[1]**2 + momentum[2]**2) >= float(sys.argv[3]):
+                    pT = math.sqrt(momentum[1]**2 + momentum[2]**2) 
+                    eta = math.asinh(momentum[0]/pT)
+                    phi = math.asin(momentum[1]/pT)
+                    if pT >= ranges["pTMin"] and pT <= ranges["pTMax"] \
+                    and eta >= ranges["etaMin"] and eta <= ranges["etaMax"] \
+                    and phi >= ranges["phiMin"] and phi <= ranges["phiMax"]:
                         if firstParticle:
                             particles.append(eventID)
                             firstParticle = False
@@ -35,7 +55,10 @@ def parse_hepmc(filename):
                         particles.append(particle)
     return particles
 
-particles = parse_hepmc(sys.argv[1])
+
+
+ranges = getRanges()
+particles = parse_hepmc(sys.argv[1], ranges)
 data = open(sys.argv[2], 'w')
 
 nevents = 0

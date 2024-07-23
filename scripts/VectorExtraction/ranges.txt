@@ -1,0 +1,6 @@
+etaMin -2.011
+etaMax 2.4697
+phiMin -1.514
+phiMax 1.5596
+pTMin 30
+pTMax 9999999

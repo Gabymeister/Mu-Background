@@ -21,6 +21,7 @@ phi_range = [100000, -100000]
 open(str(sys.argv[1]) + PREFIX + str(sys.argv[2]) + ".txt", 'w').close()
 in_range = 0
 TotalEvents = 0
+TotalMuons = 0
 for i in range(int(sys.argv[3])):
 
     # Opening the first text file to add
@@ -46,6 +47,7 @@ for i in range(int(sys.argv[3])):
             # Combining files, so add based on total so far
             line = "n " + str(eventNum + TotalEvents) + " 0 .0 .0 .0 .0 .0 .0  \n"
         else:
+            TotalMuons += 1
             data = line.split()
             phi = math.atan(float(data[5])/float(data[4]))
             eta = math.atanh(float(data[4])/math.sqrt(float(data[4])**2 + float(data[5])**2 + float(data[6])**2))
@@ -64,6 +66,7 @@ for i in range(int(sys.argv[3])):
     TotalEvents += FileEvents
 
 print("Total Events:", TotalEvents)
+print("Total Muons:", TotalMuons)
 print("Events towards detector:", in_range)
 print("Eta ranges:", eta_range)
 print("Phi ranges:", phi_range)
