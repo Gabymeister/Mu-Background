@@ -1,29 +1,33 @@
 #!/bin/bash
 #SBATCH --time=6:00:00
-#SBATCH --account=def-mdiamond
-#SBATCH --array=1-100
+#SBATCH --account=rrg-mdiamond
+#SBATCH --array=1-5
 #SBATCH --mem=2G
 
 
-# ${1} is the location of the madgraph executable.
-# ${2} is the minimum pT cutoff you want to apply (in MeV) (normally 20k)a
+#PATH_MATHUSLA="/project/rrg-mdiamond/data/MATHUSLA/"
+source init.sh
+#------------------------------------------------------------------
+# Dependencies
+# MG5, PYTHIA and dlib are manually installed
+# The rest is available from the preinstalled modules on cedar
+#export MG5_Dir=${PATH_MATHUSLA}/bin/MG5_aMC_v3_5_4
+#export MG5_bin=${MG5_Dir}/bin/mg5_aMC
+#export PYTHIA8=${MG5_Dir}/HEPTools/pythia8
+#export PYTHIA8DATA=${MG5_Dir}/HEPTools/pythia8/share/Pythia8/xmldoc
+#PATH=$PATH:${PATH_MATHUSLA}/bin/dlib-19.24/install
+#export Extractor=../VectorExtraction/run_muon_extract.py
+#module load StdEnv/2020 gcc/9.3.0 qt/5.12.8 root/6.26.06  eigen/3.3.7 geant4/10.7.3 geant4-data/10.7.3
 
-# Usage
-if [ $# -ne 2 ]; then
-	echo "Usage: $0 <MG5 TopDirectory> <pT Cutoff>"
-	echo "Note: MG5 TopDirectory should be the ABSOLUTE path"
-	exit 1
-fi
 # ---------------------------------------------------------------------------------------
 # PATHS TO EXECUTABLES
 # MG5_Dir is where the madgraph TOP DIRECTORY is
-MG5_Dir=${1}
 # Scripts is the directory where the Base MadGraph Script is
-Scripts=`realpath ../Mu-Simulation/VectorExtraction/MadGraphScripts`
+Scripts=`realpath scripts/madgraph/`
 # Extractor is the directory where the python extractor is
-Extractor=`realpath ../Mu-Simulation/VectorExtraction/run_muon_extract.py`
+Extractor=`realpath scripts/VectorExtraction/run_muon_extract.py`
 # Combiner is the directory where the python extractor is
-Combiner=`realpath ../Mu-Simulation/VectorExtraction/combine_muon_data.py`
+Combiner=`realpath scripts/VectorExtraction/combine_muon_data.py`
 
 # ---------------------------------------------------------------------------------------
 # TEMPORARY DIRECTORIES FOR MADGRAPH
@@ -65,15 +69,14 @@ echo $PYTHIA8DATA
 # ---------------------------------------------------------------------------------------
 # Running MadGraph
 # Two identifiers: One is the MG5 set number, the other is the Job number
-# Each set number corresponds to about 25 hours (check this)
-NumSets=5
+NumSets=3
 for (( c=0; c<NumSets; c++ )) # Generate NumSets*10000 MadGraph Events
 do
 
   # Create the MadGraph Scripts for each set of each job
   echo "Creating MadGraph Scripts"
   seedval=$((c + NumSets * SLURM_ARRAY_TASK_ID))
-  cp "${Scripts}/sm_muprod_wz.txt" "${MadGraphScripts}/sm_muprod_wz_${SLURM_ARRAY_TASK_ID}_${c}.txt"
+  cp "${Scripts}/card_wz_matched.dat" "${MadGraphScripts}/sm_muprod_wz_${SLURM_ARRAY_TASK_ID}_${c}.txt"
   sed -i "14s/.*/set iseed = ${seedval}/" "${MadGraphScripts}/sm_muprod_wz_${SLURM_ARRAY_TASK_ID}_${c}.txt"
   sed -i "5s|.*|output ${MGDataDir}/proc_sm_muprod_wz_matched_${SLURM_ARRAY_TASK_ID}_${c}|" "${MadGraphScripts}/sm_muprod_wz_${SLURM_ARRAY_TASK_ID}_${c}.txt"
   sed -i "6s|.*|launch ${MGDataDir}/proc_sm_muprod_wz_matched_${SLURM_ARRAY_TASK_ID}_${c}|" "${MadGraphScripts}/sm_muprod_wz_${SLURM_ARRAY_TASK_ID}_${c}.txt"
@@ -87,7 +90,9 @@ do
 
   # Run the extractor
   echo "Extracting Muons"
-  python3 ${Extractor} "${HepMCDir}/Events/run_01/tag_1_pythia8_events.hepmc" "${HepMCToText}/bkg_muon_${SLURM_ARRAY_TASK_ID}_${c}.txt" ${2}
+  python3 ${Extractor} "${HepMCDir}/Events/run_01/tag_1_pythia8_events.hepmc" "${HepMCToText}/bkg_muon_${SLURM_ARRAY_TASK_ID}_${c}.txt"
+
+  echo "Finished Extraction"
 
   # Delete the data folder
   echo "Removing data folder"
@@ -98,6 +103,7 @@ done # Generated NumSets text files of 10000 muon events
  # Combine the Text Files into One/Create Geant4 scripts
 echo "Combining Text Files"
 python3 ${Combiner} "${G4Input}" "${SLURM_ARRAY_TASK_ID}" "${NumSets}" "${HepMCToText}"
+echo "Finished Combination"
 for (( c=0; c<NumSets; c++ ))
 do
   rm "${HepMCToText}/bkg_muon_${SLURM_ARRAY_TASK_ID}_${c}.txt"
