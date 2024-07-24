@@ -1,22 +1,22 @@
 #!/bin/bash
-#SBATCH --time=1:00:00
+#SBATCH --time=3:00:00
 #SBATCH --account=rrg-mdiamond
-#SBATCH --array=1-1
+#SBATCH --array=1-10
 #SBATCH --mem=2G
 
 
-# ${1} is the minimum pT cutoff you want to apply (in MeV) (normally 20k)
-# ${2} is the number of MG5 events to run*10 thousand (i.e. 5 -> 50000 events)
+# ${1} is the number of MG5 events to run*10 thousand (i.e. 5 -> 50000 events)
 
 # NOTE: THIS SCRIPT MUST BE RUN WITHIN A SLURM JOB. MG5 Output is too large otherwise
 
 # Usage
-if [ $# -ne 2 ]; then
-	echo "Usage: $0  <pT Cutoff (MeV)> <RUN_NUMBER*10k>" # Print help message if number of arguments is more than 2
+if [ $# -ne 1 ]; then
+	echo "Usage: $0 <RUN_NUMBER*10k>" # Print help message if number of arguments is not 1
 	exit 1
 fi
-pTcut=${1}
-NumSets=${2}
+
+NumSets=${1}
+source init.sh
 
 
 # ---------------------------------------------------------------------------------------
@@ -72,7 +72,7 @@ do
 
   # Run the extractor
   echo "Extracting Muons"
-  python3 ${Extractor} "${HepMCDir}/Events/run_01/tag_1_pythia8_events.hepmc" "${HepMCToText}/bkg_muon_${SLURM_ARRAY_TASK_ID}_${c}.txt" $pTcut
+  python3 ${Extractor} "${HepMCDir}/Events/run_01/tag_1_pythia8_events.hepmc" "${HepMCToText}/bkg_muon_${SLURM_ARRAY_TASK_ID}_${c}.txt"
 
   # Delete the data folder
   echo "Removing data folder"
