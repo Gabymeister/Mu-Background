@@ -19,6 +19,8 @@ def getRanges():
 
 
 def parse_hepmc(filename, ranges):
+    nTotalMuons = 0
+    nUsedMuons = 0
     particles = []
     i = 1
     firstParticle = True
@@ -39,20 +41,30 @@ def parse_hepmc(filename, ranges):
                 position = [float(line[5]), float(line[3]), 85470-float(line[4])]
             # If it is a particle, is an end product, and is a muon or antimuon
             if (line[0]=="P") and (line[8]=="1") and ((line[2]=="13") or (line[2]=="-13")):
+                    nTotalMuons += 1
                     # Setting this to Geant4 coordinates and units to MeV/c
                     momentum = [1000*float(line[5]), 1000*float(line[3]), -1000*float(line[4])]
-                    pT = math.sqrt(momentum[1]**2 + momentum[2]**2) 
-                    eta = math.asinh(momentum[0]/pT)
-                    phi = -math.asin(momentum[2]/pT)
+                    pT = math.sqrt(momentum[1]**2 + momentum[2]**2)/1000
+                    eta = math.asinh(momentum[0]/1000/pT)
+                    phi = math.asin(momentum[1]/1000/pT)
+                    if momentum[2] > 0: # 
+                        phi = phi + phi/abs(phi) *math.pi/2
+                    #print("eta:", eta)
+                    #print("phi:", -phi)
+                    #print("vertical momentum:", momentum[2])
                     if pT >= ranges["pTMin"] and pT <= ranges["pTMax"] \
                     and eta >= ranges["etaMin"] and eta <= ranges["etaMax"] \
-                    and phi >= ranges["phiMin"] and phi <= ranges["phiMax"]:
+                    and phi >= ranges["phiMin"] and phi <= ranges["phiMax"]: 
+                    #and momentum[2] < 0: # Last one to do upper hemisphere
                         if firstParticle:
                             particles.append(eventID)
                             firstParticle = False
                             i+=1
                         particle = [int(line[2])] + position + momentum
                         particles.append(particle)
+                        nUsedMuons += 1
+    print("Number of muons in file:", nTotalMuons)
+    print("Number of used muons:", nUsedMuons)
     return particles
 
 
