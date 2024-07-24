@@ -43,7 +43,7 @@ def parse_hepmc(filename, ranges):
                     momentum = [1000*float(line[5]), 1000*float(line[3]), -1000*float(line[4])]
                     pT = math.sqrt(momentum[1]**2 + momentum[2]**2) 
                     eta = math.asinh(momentum[0]/pT)
-                    phi = math.asin(momentum[1]/pT)
+                    phi = -math.asin(momentum[2]/pT)
                     if pT >= ranges["pTMin"] and pT <= ranges["pTMax"] \
                     and eta >= ranges["etaMin"] and eta <= ranges["etaMax"] \
                     and phi >= ranges["phiMin"] and phi <= ranges["phiMax"]:
