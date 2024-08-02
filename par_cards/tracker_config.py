@@ -7,7 +7,7 @@ parameters["debug_tracker"]=False
 parameters["debug_vertexer"]=False
 parameters["print_n"]=1000
 parameters["start_event"]=0                 # 0-based index
-parameters["end_event"]=10_000_000
+parameters["end_event"]=1_000
 parameters["seed"]=1                        # Seed for random number generator (used for scintillator efficiency)
 parameters["detector_efficiency"]=1         # Scintillator efficiency, any number between 0-1, 1 is 100%
 

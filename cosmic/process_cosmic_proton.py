@@ -238,8 +238,8 @@ for i in range(len(filenames)):
                 
         #     for cut_par, cut_op in zip(cut_pars, cut_ops):
                 
-        # if energy < 2.67e3:
-        #     continue
+        if energy < 2.67e3:
+            continue
         
         data_combined["x"].append(x*10+hit_offset_x*1000)
         data_combined["y"].append(y*10+hit_offset_y*1000)

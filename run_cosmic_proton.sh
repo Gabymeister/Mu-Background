@@ -87,7 +87,7 @@ fi
 cd ..
 echo  $PATH_COSMIC_out
 mkdir -p $PATH_COSMIC_out/run_$RUN
-python process_cosmic.py `realpath ${parma_run_path}` $PATH_COSMIC_out/run_$RUN   $SUBMIT
+python process_cosmic_proton.py `realpath ${parma_run_path}` $PATH_COSMIC_out/run_$RUN   $SUBMIT --sim_option="-D"
 
 popd
 
