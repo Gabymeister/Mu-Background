@@ -47,6 +47,8 @@ mkdir -p $MadGraphScripts
 mkdir -p $MGDataDir
 mkdir -p $HepMCToText
 
+echo "Running MadGraph+Pythia"
+echo "  Current time since epoch " $EPOCHSECONDS "s"
 
 # ---------------------------------------------------------------------------------------
 # Running MadGraph
@@ -77,6 +79,7 @@ do
   # Delete the data folder
   echo "Removing data folder"
   rm -rf "${HepMCDir}"
+  echo "  Current time since epoch " $EPOCHSECONDS "s"  
 done # Generated NumSets text files of 10000 muon events
 
 # ---------------------------------------------------------------------------------------
@@ -87,6 +90,7 @@ for (( c=0; c<NumSets; c++ ))
 do
   rm "${HepMCToText}/bkg_muon_${SLURM_ARRAY_TASK_ID}_${c}.txt"
 done
+echo "  Current time since epoch " $EPOCHSECONDS "s"  
 
 # ---------------------------------------------------------------------------------------
 # Run Geant4
@@ -95,6 +99,8 @@ echo "simulation directory: ${simulation_dir}"
 pushd ${simulation_dir}
 ./simulation -q -s ${PATH_MG5_in}/bkg_muon_${SLURM_ARRAY_TASK_ID}.mac -o ${PATH_MG5_out}/bkg_muon_${SLURM_ARRAY_TASK_ID}
 popd
+
+echo "  Current time since epoch " $EPOCHSECONDS "s"  
 
 
 # Clean up the text file

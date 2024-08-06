@@ -73,14 +73,9 @@ Reference:
 
 Install:  
 
-```bash
-# # Install Pythia
-# wget https://pythia.org/download/pythia83/pythia8306.tar
-# tar -xf pythia8306.tar; rm pythia8306.tar; cd pythia8306
-# ./configure
-# make -j8
-# cd ..
 
+
+```bash
 # Install Madgraph
 module load StdEnv/2020 gcc/9.3.0 qt/5.12.8 root/6.26.06  eigen/3.3.7 geant4/10.7.3 geant4-data/10.7.3
 mg5_version="MG5_aMC_v3_5_4"
@@ -91,7 +86,20 @@ tar -xzf ${mg5_version_download}.tar.gz
 realpath ${mg5_version} # Print the full path of the installed Madgraph
 cd $mg5_version
 ./bin/mg5_aMC
-install pythia
+install lhapdf6 zlib hepmc
+
+
+# # Install Pythia
+# wget https://pythia.org/download/pythia83/pythia8306.tar
+# tar -xf pythia8306.tar; rm pythia8306.tar; cd pythia8306
+# HEPTools=/project/rrg-mdiamond/data/MATHUSLA/bin/MG5_aMC_v3_5_4/HEPTools/
+# ./configure  --prefix=${HEPTools}/pythia8/ --with-hepmc2=${HEPTools}/hepmc --with-hepmc2-include=${HEPTools}/hepmc/include --with-gzip=${HEPTools}/zlib --with-lhapdf6=${HEPTools}/lhapdf6_py3 --with-lhapdf6-plugin=LHAPDF6.h --cxx-common='-ldl -fPIC -lstdc++ -std=c++11 -O2 -DHEPMC2HACK'
+# make -j8
+# make install
+# cd ..
+
+./bin/mg5_aMC
+install mg5amc_py8_interface
 exit 
 
 ```

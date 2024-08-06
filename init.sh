@@ -1,7 +1,8 @@
 #------------------------------------------------------------
 # CHANGE THE RUN NAME
 PATH_MATHUSLA="/project/rrg-mdiamond/data/MATHUSLA/"
-RUN_NAME="run-2024-06-cosmic-muon" # RUN Name. ALWAYS START WITH 'run-YYYY-MM-'
+RUN_NAME="run-2024-07-cosmic-proton" # RUN Name. ALWAYS START WITH 'run-YYYY-MM-'
+RUN_DESCRIPTION=''
 
 # * PATH_MATHUSLA sets the path to the MATHUSLA folder
 # * RUN_NAME sets the run name
