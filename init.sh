@@ -1,7 +1,7 @@
 #------------------------------------------------------------
 # CHANGE THE RUN NAME
 PATH_MATHUSLA="/project/rrg-mdiamond/data/MATHUSLA/"
-RUN_NAME="run-2024-07-cosmic-proton" # RUN Name. ALWAYS START WITH 'run-YYYY-MM-'
+RUN_NAME="run-2024-07-" # RUN Name. ALWAYS START WITH 'run-YYYY-MM-'
 RUN_DESCRIPTION=''
 
 # * PATH_MATHUSLA sets the path to the MATHUSLA folder
@@ -163,6 +163,27 @@ function process_all () {
 	config_file=$PATH_REPO/par_cards/tracker_config.py
 	io_files_pattern=$PATH_REPO/par_cards/tracker_io/io_MuSim-noise*.py
 	io_files=( $io_files_pattern )
+	# Copy the config file
+	\cp $config_file $output_dir/
+
+	# Run tracker
+	for iofile in "${io_files[@]}"
+	do
+		io_ext=${iofile##*/} # Get the basename
+		io_ext="${io_ext%.*}"
+		pytracker $1 $2 --config $config_file --overwrite --output_suffix $io_ext --io $iofile
+	done
+}
+
+# Process using all IO files in par_cards/tracker_io/
+# $1: digitized root file
+# $2: output directory
+function process_best_worst () {
+	digi_root_file=$1
+	output_dir=$2
+
+	config_file=$PATH_REPO/par_cards/tracker_config.py
+	io_files=( $PATH_REPO/par_cards/tracker_io/io_MuSim-noise0.1-layers6-eff1.00.py $PATH_REPO/par_cards/tracker_io/io_MuSim-noise10-layers4-eff0.90.py )
 	# Copy the config file
 	\cp $config_file $output_dir/
 

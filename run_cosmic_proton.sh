@@ -113,7 +113,8 @@ if [ ! -z "${DIGITIZE}" ]; then
         ./digitizer -l $file  -o ${PATH_Digi_out}/cosmic_run_$RUN/$i
 
         # tracker
-        pytracker ${PATH_Digi_out}/cosmic_run_$RUN/$i/stat0.root ${PATH_Digi_out}/cosmic_run_$RUN/$i  --config $PATH_REPO/par_cards/tracker_config.py --overwrite
+        # pytracker ${PATH_Digi_out}/cosmic_run_$RUN/$i/stat0.root ${PATH_Digi_out}/cosmic_run_$RUN/$i  --config $PATH_REPO/par_cards/tracker_config.py --overwrite
+        process_best_worst ${PATH_Digi_out}/cosmic_run_$RUN/$i/stat0.root ${PATH_Digi_out}/cosmic_run_$RUN/$i
 
         ((i+=1))
     done    

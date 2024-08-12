@@ -9,16 +9,21 @@
 # Cosmic variables
 cosmic=false
 cosmic_dir=""
+output_dir=${PATH_Digi_out}
 
 # ------------------------------------------------------------------------------------------------
 # Checking that options are valid and if cosmic input is being used
-while getopts "c:" opt; do
+while getopts "c:o:" opt; do
 	case $opt in 
 		c)
 			cosmic_dir="$OPTARG"
 			cosmic=true
 			echo "cosmic"
 			;;
+		o)
+            output_dir="$OPTARG"
+            echo "Setting output directory to $output_dir"
+            ;;
 		\?)
 			echo "Invalid Option: ${OPTARG}"
 			echo "Usage: <LHC_root_directory> -c <cosmic directory>"
@@ -56,15 +61,15 @@ echo "Running Digitizer"
 i=0
 # Don't know exactly the name of the G4 output root file (dependent on date)
 find "${1}" -type f -name "*.root" | while read -r file; do
-	if [ ! -d ${PATH_Digi_out}/$i ]; then
-		mkdir ${PATH_Digi_out}/$i
+	if [ ! -d ${output_dir}/$i ]; then
+		mkdir ${output_dir}/$i -p
 	fi
 
 	if $cosmic; then
 		echo "running cosmic"
-		./digitizer -l $file -c $cosmic_dir  -o ${PATH_Digi_out}/$i
+		./digitizer -l $file -c $cosmic_dir  -o $output_dir/$i
 	else 
-		./digitizer -l $file  -o ${PATH_Digi_out}/$i
+		./digitizer -l $file  -o $output_dir/$i
 	fi
 	((i+=1))
 done
