@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --time=0:30:00
+#SBATCH --time=4:00:00
 #SBATCH --account=rrg-mdiamond
 #SBATCH --array=1-1000
 #SBATCH --mem=2G
@@ -8,7 +8,14 @@
 
 source init.sh
 
-SLURM_ARRAY_TASK_ID=1
+if [ -z ${SLURM_ARRAY_TASK_ID+1} ]; 
+then 
+    echo "SLURM_ARRAY_TASK_ID is unset (running interactively). Setting it to 1"; 
+    SLURM_ARRAY_TASK_ID=1
+else echo "SLURM_ARRAY_TASK_ID is set to '$var'"; 
+fi
+
+# SLURM_ARRAY_TASK_ID=1
 
 # one cosmic root file per lhc root file
 echo "Generating LHC root file"
