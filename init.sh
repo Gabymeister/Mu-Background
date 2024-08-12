@@ -142,3 +142,38 @@ echo "Results saved in ${PATH_DATA}"
 echo "-------------------------------------------"
 
 
+
+# Make some functions
+
+# Process using the default IO file
+# $1: digitized root file
+# $2: output directory
+function process_default () {
+	pytracker $1 $2 --config $PATH_REPO/par_cards/tracker_config.py --overwrite
+}
+
+
+# Process using all IO files in par_cards/tracker_io/
+# $1: digitized root file
+# $2: output directory
+function process_all () {
+	digi_root_file=$1
+	output_dir=$2
+
+	config_file=$PATH_REPO/par_cards/tracker_config.py
+	io_files_pattern=$PATH_REPO/par_cards/tracker_io/io_MuSim-noise*.py
+	io_files=( $io_files_pattern )
+	# Copy the config file
+	\cp $config_file $output_dir/
+
+	# Run tracker
+	for iofile in "${io_files[@]}"
+	do
+		io_ext=${iofile##*/} # Get the basename
+		io_ext="${io_ext%.*}"
+		pytracker $1 $2 --config $config_file --overwrite --output_suffix $io_ext --io $iofile
+	done
+}
+
+
+

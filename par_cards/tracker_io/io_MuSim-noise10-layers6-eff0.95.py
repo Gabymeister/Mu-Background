@@ -39,14 +39,13 @@ import numpy as np
 
 import tracker.datatypes as datatypes
 
-
+noise_level_simulation = 10 # The simulation noise rate is ten times cosmic
 # ------------------------------------------------
 # Set the active layers, noise level, detector efficiency
-NOISE       = 10     # One times cosmic rate
-LAYERS      = 6     # Active layers. The code below will automatically decide which layers to keep
-EFFICIENCY  = 1  # Detector efficiency
+NOISE       = 10
+LAYERS      = 6
+EFFICIENCY  = 0.95
 # ------------------------------------------------
-noise_level_simulation = 10 # The simulation noise rate is ten times cosmic
 
 
 # Layer ID for each group
